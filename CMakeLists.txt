@@ -15,7 +15,7 @@ set(BIN_DIR ${CMAKE_SOURCE_DIR}/bin)
 set(EXECUTABLE_OUTPUT_PATH ${BIN_DIR})
 
 # All needed source files
-file(GLOB_RECURSE SOURCES ${SRC_DIR}/*.h)
+file(GLOB_RECURSE SOURCES ${SRC_DIR}/*.h ${SRC_DIR}/*.c)
 message(STATUS "Found ${SOURCES} source files")
 
 add_executable(debug ${SRC_DIR}/main.c ${SOURCES})
