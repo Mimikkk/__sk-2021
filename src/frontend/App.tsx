@@ -1,6 +1,6 @@
 import './App.scss';
 import { useSocket } from './hooks';
-import { isConnected } from './hooks/useSocket/socket-status';
+import { isConnected, isDisconnected } from './hooks/useSocket/socket-status';
 import { Logger } from './components/devtools/Logger';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
@@ -17,11 +17,12 @@ export const App = () => {
             type="button"
             onClick={() => {
               console.log(status);
-              if (isConnected(status)) {
+              if (isDisconnected(status)) {
                 socket.onopen = () => console.log('Connected');
                 socket.onclose = () => console.log('Close');
-              } else {
-                console.log('Trying to close.');
+                socket.onmessage = console.log;
+                socket.onerror = console.log;
+              } else if (isConnected(status)) {
                 socket.close();
               }
             }}

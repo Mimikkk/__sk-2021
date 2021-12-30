@@ -2,4 +2,5 @@
 /bin/
 /cmake-build-debug/
 /node_modules/
-/src/frontend/env.d.ts
+/**/env*
+/**/.env*
