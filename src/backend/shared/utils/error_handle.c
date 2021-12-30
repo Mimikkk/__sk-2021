@@ -1,14 +1,18 @@
 #include <shared/utils/imports.h>
 #include <shared/utils/error_handle.h>
+#include "console.h"
+
+static const int Success = 0;
+static const int Failure = 1;
 
 static void handle_exit(int exitcode) {
-  if (exitcode > 0) printf("Exiting due to error with code '%d'\n", exitcode);
+  if (exitcode != Success) console.error("Exiting due to error with code '%d'\n", exitcode);
   exit(exitcode);
 }
 static bool handle_error(bool is_error, const char *message) {
   if (is_error) {
-    fprintf(stderr, "Error: %s\n", message);
-    handle_exit(1);
+    console.error(message);
+    handle_exit(Failure);
   }
   return true;
 }
@@ -16,6 +20,6 @@ static bool handle_error(bool is_error, const char *message) {
 const struct quit_lib quit = {
         .on = handle_error,
         .graceful = handle_exit,
-        .Success = 0,
-        .Failure = 1,
+        .Success = Success,
+        .Failure = Failure,
 };
