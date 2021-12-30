@@ -5,8 +5,8 @@ extern const struct server_lib {
     void (*close)(void);
     const char *(*info)(void);
 
-    int *socket;
-    struct sockaddr_in *address;
-    int port;
-    int max_connections;
+    const int *socket;
+    const struct sockaddr_in *address;
+    const int port;
+    const int max_connections;
 } server;

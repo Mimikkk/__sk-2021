@@ -28,7 +28,7 @@ static void set_address(void) {
   server_address = (struct sockaddr_in) {AF_INET, htons(Port), {inet_addr(Address)}};
 }
 
-static void open_server(void) {
+static void open_server() {
   quit.on(set_socket() < 0, "Failed to create a socket");
   quit.on(set_reusable() < 0, "Failed to set socket's options");
   set_address();
