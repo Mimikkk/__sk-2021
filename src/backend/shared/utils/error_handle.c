@@ -7,6 +7,7 @@ static const int Failure = 1;
 
 static void handle_exit(int exitcode) {
   if (exitcode != Success) console.error("Exiting due to error with code '%d'\n", exitcode);
+  else console.info("Exiting successfully.\n", exitcode);
   exit(exitcode);
 }
 static bool handle_error(bool is_error, const char *message) {
@@ -19,7 +20,7 @@ static bool handle_error(bool is_error, const char *message) {
 
 const struct quit_lib quit = {
         .on = handle_error,
-        .graceful = handle_exit,
+        .now = handle_exit,
         .Success = Success,
         .Failure = Failure,
 };
