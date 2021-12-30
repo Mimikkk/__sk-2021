@@ -1,23 +1,35 @@
-import {useRef, useState} from 'react'
-import logo from './logo.svg'
-import './App.css'
+import './App.scss';
+import { useSocket } from './hooks';
+import { isConnected } from './hooks/useSocket/socket-status';
+import { Logger } from './components/devtools/Logger';
 
-const App = () => {
-  const socket = useRef(new WebSocket('ws://localhost:9090'));
+export const App = () => {
+  const { socket, status } = useSocket('ws://localhost:9090');
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>React</p>
-        <p>
-          <button type="button" onClick={() => console.log(socket)}>
-              Socket
+    <>
+      <div className="app">
+        <header className="app-header">
+          <p>React</p>
+          <button
+            type="button"
+            onClick={() => {
+              console.log(status);
+              if (isConnected(status)) {
+                socket.onopen = () => console.log('Connected');
+                socket.onclose = () => console.log('Close');
+              } else {
+                console.log('Trying to close.');
+                socket.close();
+              }
+            }}
+          >
+            Socket is {status}
           </button>
-        </p>
-          <p>Socket connected to {socket.current.url}.</p>
-      </header>
-    </div>
-  )
+          <p>Socket on {socket.url}.</p>
+        </header>
+        <Logger />
+      </div>
+    </>
+  );
 };
-
-export default App
