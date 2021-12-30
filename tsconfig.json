@@ -20,7 +20,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "baseUrl": "./src/frontend",
-    "rootDir": "./src/frontend",
+    "rootDir": "./src/frontend"
   },
   "include": [
     "src/frontend"

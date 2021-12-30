@@ -3,8 +3,10 @@ import { useSocket } from './hooks';
 import { isConnected } from './hooks/useSocket/socket-status';
 import { Logger } from './components/devtools/Logger';
 
+const server_url = import.meta.env.VITE_SERVER_URL;
+
 export const App = () => {
-  const { socket, status } = useSocket('ws://localhost:9090');
+  const { socket, status } = useSocket(`ws://${server_url}`);
 
   return (
     <>
