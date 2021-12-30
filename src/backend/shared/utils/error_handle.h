@@ -1,5 +1,5 @@
 #pragma once
-#include "imports.h"
+#include <stdbool.h>
 
 extern const struct quit_lib {
     bool (*on)(bool, const char *);

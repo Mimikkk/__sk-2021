@@ -1,5 +1,5 @@
-#include <imports.h>
-#include <error_handle.h>
+#include <shared/utils/imports.h>
+#include <shared/utils/error_handle.h>
 
 static void handle_exit(int exitcode) {
   if (exitcode > 0) printf("Exiting due to error with code '%d'\n", exitcode);

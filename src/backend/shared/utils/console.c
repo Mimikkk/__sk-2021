@@ -1,7 +1,7 @@
-#include <console.h>
+#include <shared/utils/console.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <utils.h>
+#include <shared/utils/common.h>
 
 static void printfln(const char *format, ...) {
   const char *s = str(format);
