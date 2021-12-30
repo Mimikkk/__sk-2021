@@ -19,6 +19,4 @@ file(GLOB_RECURSE SOURCES ${SRC_DIR}/*.h ${SRC_DIR}/*.c)
 message(STATUS "Found ${SOURCES} source files")
 
 add_executable(server ${SRC_DIR}/main.c ${SOURCES})
-add_executable(client ${SRC_DIR}/main.c ${SOURCES})
 target_include_directories(server PRIVATE ${SRC_DIR})
-target_include_directories(client PRIVATE ${SRC_DIR})
