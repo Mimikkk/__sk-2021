@@ -6,6 +6,7 @@ extern const struct events_lib {
     void (*remove)(int);
     void (*await)(void);
     void (*handle)(struct epoll_event);
+    char *(*info)(struct epoll_event);
 
     size_t *awaited_count;
     struct epoll_event *awaited;

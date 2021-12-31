@@ -7,4 +7,5 @@
 #define loop while (true)
 #define noreturn _Noreturn void
 
-extern const char *str(const char *format, ...);
+extern char *str(const char *format, ...);
+extern char *strip(const char *str);

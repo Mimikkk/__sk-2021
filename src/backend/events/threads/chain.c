@@ -13,27 +13,15 @@ static bool is_running = true;
 
 static void create_epoll(void) {
   epollfd = epoll_create1(0);
-  quit.on(epollfd < 0, "Epoll creation failure");
+  let had_error = epollfd < 0;
+  quit.on(had_error, "Epoll creation failure");
 }
 
 static void handle_events(void) {
   for (int n = 0; n < *events.awaited_count; ++n) {
     let event = events.awaited[n];
-    console.info("socket '%d' event\n", event.data.fd);
-    console.log("Event '%d'", event.events);
+    console.log(events.info(event));
     events.handle(event);
-//    if (event.data.fd == InputFd) {
-//      console.log("Server Stdin");
-//      if (events.awaited[n].events == EPOLLIN) {
-//        is_running = false;
-//        return;
-//      }
-//  } else
-//    if (event.data.fd == *server.socket) {
-//      let fd = server.accept();
-//      events.add(fd, EPOLLIN | EPOLLOUT | EPOLLHUP | EPOLLET);
-//      console.info("Added new socket '%d'", fd);
-//    }
   }
 }
 

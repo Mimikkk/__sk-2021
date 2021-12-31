@@ -3,6 +3,7 @@
 #include <events/threads/chain.h>
 #include <shared/utils/error_handle.h>
 #include <shared/utils/console.h>
+#include <ctype.h>
 #include "events/listeners/listeners.h"
 
 enum { MaxEvents = 10 };
@@ -57,10 +58,26 @@ static void handle_event(struct epoll_event event) {
   }
 }
 
+static char *event_info_callbacks(struct epoll_event event) {
+  var info = (char*)malloc(sizeof(char) * 1024);
+  if (is_hangup(event)) strcat(info, "hangup ");
+  if (is_error(event)) strcat(info, "error ");
+  if (is_readable(event)) strcat(info, "input ");
+  if (is_writeable(event)) strcat(info, "output ");
+  var result = strip(info);
+  return result;
+}
+static char *event_info(struct epoll_event event) {
+  let info = event_info_callbacks(event);
+  let result = str("Socket '%d' with [%s] events", event.data.fd, info);
+  return result;
+}
+
 const struct events_lib events = {
         .add = add_event,
         .await = await_events,
         .handle = handle_event,
+        .info = event_info,
 
         .awaited_count = &event_count,
         .awaited = listened,
