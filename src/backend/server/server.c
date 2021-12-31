@@ -2,7 +2,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <malloc.h>
+#include <fcntl.h>
 #include "server.h"
 
 static const int MaxConnections = 3;
@@ -28,7 +28,7 @@ static void set_address(void) {
   server_address = (struct sockaddr_in) {AF_INET, htons(Port), {inet_addr(Address)}};
 }
 
-static void open_server() {
+static void open_server(void) {
   quit.on(set_socket() < 0, "Failed to create a socket");
   quit.on(set_reusable() < 0, "Failed to set socket's options");
   set_address();
@@ -40,10 +40,17 @@ static void close_server(void) {
 }
 static const char *server_info(void);
 
+static int accept_connection(void) {
+  int connection_socket = accept(*server.socket, NULL, NULL);
+  fcntl(connection_socket, F_SETFL, O_NONBLOCK, true);
+  return connection_socket;
+}
+
 const struct server_lib server = {
         .close = close_server,
         .open = open_server,
         .info = server_info,
+        .accept = accept_connection,
 
         .port = Port,
         .socket = &server_socket,
