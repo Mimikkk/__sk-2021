@@ -4,7 +4,8 @@
 #include <shared/imports.h>
 #include <shared/utils/console.h>
 #include <events/events.h>
-#include <events/listeners.h>
+#include <events/listeners/listeners.h>
+#include <events/listeners/stdin.h>
 
 enum { InputFd = 0, };
 static int epollfd;
@@ -20,7 +21,7 @@ static void handle_events(void) {
     let event = events.awaited[n];
     console.info("socket '%d' event\n", event.data.fd);
     console.log("Event '%d'", event.events);
-
+    events.handle(event);
 //    if (event.data.fd == InputFd) {
 //      console.log("Server Stdin");
 //      if (events.awaited[n].events == EPOLLIN) {
@@ -42,17 +43,22 @@ static void epoll_initialize(void) {
   console.info("Added server socket and stdin to await_events.");
   events.add(*server.socket, EPOLLIN | EPOLLET);
   events.add(InputFd, EPOLLIN | EPOLLET);
+  listeners.set(InputFd, stdin_listener.create());
 
   console.info("Epoll awaiting events...");
   while (is_running) {
     events.await();
     handle_events();
-    is_running = false;
   }
+}
+
+void stop(void) {
+  is_running = false;
   console.info("Epoll exiting.");
 }
 
 const struct chain_lib chains = {
         .start = epoll_initialize,
         .fd = &epollfd,
+        .stop = stop
 };

@@ -3,7 +3,7 @@
 #include <events/threads/chain.h>
 #include <shared/utils/error_handle.h>
 #include <shared/utils/console.h>
-#include "listeners.h"
+#include "events/listeners/listeners.h"
 
 enum { MaxEvents = 10 };
 
@@ -38,7 +38,6 @@ inline static bool is_writeable(struct epoll_event event) {
 }
 
 static void handle_event(struct epoll_event event) {
-  console.log("%d", event.events);
   let listener = *listeners.get(event.data.fd);
   if (is_hangup(event) && listener.on_hangup) {
     listener.on_hangup(event);
