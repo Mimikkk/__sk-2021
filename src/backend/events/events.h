@@ -5,7 +5,7 @@ extern const struct events_lib {
     void (*add)(int, uint32_t);
     void (*remove)(int);
     void (*await)(void);
-    void (*handle)(void);
+    void (*handle)(struct epoll_event);
 
     size_t *awaited_count;
     struct epoll_event *awaited;

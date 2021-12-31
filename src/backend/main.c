@@ -13,7 +13,7 @@ int main(void) {
   console.info("Creating epoll thread...");
   Thread thread = threads.create(chains.start);
   while (threads.is_alive(thread)) {
-    console.info("Waiting for epoll thread to finish...");
+//    console.info("Waiting for epoll thread to finish...");
     sleep(2);
   }
 

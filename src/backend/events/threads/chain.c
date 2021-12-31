@@ -4,6 +4,7 @@
 #include <shared/imports.h>
 #include <shared/utils/console.h>
 #include <events/events.h>
+#include <events/listeners.h>
 
 enum { InputFd = 0, };
 static int epollfd;
@@ -16,17 +17,22 @@ static void create_epoll(void) {
 
 static void handle_events(void) {
   for (int n = 0; n < *events.awaited_count; ++n) {
-    console.info("socket '%d' event\n", events.awaited[n].data.fd);
+    let event = events.awaited[n];
+    console.info("socket '%d' event\n", event.data.fd);
+    console.log("Event '%d'", event.events);
 
-    if (events.awaited[n].data.fd == InputFd) {
-      console.log("Server Stdin");
-      is_running = false;
-      return;
-    } else if (events.awaited[n].data.fd == *server.socket) {
-      let fd = server.accept();
-      events.add(fd, EPOLLIN | EPOLLET);
-      console.info("Added new socket '%d'", fd);
-    }
+//    if (event.data.fd == InputFd) {
+//      console.log("Server Stdin");
+//      if (events.awaited[n].events == EPOLLIN) {
+//        is_running = false;
+//        return;
+//      }
+//  } else
+//    if (event.data.fd == *server.socket) {
+//      let fd = server.accept();
+//      events.add(fd, EPOLLIN | EPOLLOUT | EPOLLHUP | EPOLLET);
+//      console.info("Added new socket '%d'", fd);
+//    }
   }
 }
 
@@ -41,6 +47,7 @@ static void epoll_initialize(void) {
   while (is_running) {
     events.await();
     handle_events();
+    is_running = false;
   }
   console.info("Epoll exiting.");
 }
