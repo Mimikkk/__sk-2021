@@ -1,7 +1,5 @@
 #include <shared/imports.h>
 #include <events/events.h>
-#include <shared/utils/console.h>
-#include <events/threads/thread.h>
 #include <events/threads/chain.h>
 #include <shared/utils/error_handle.h>
 
@@ -11,7 +9,7 @@ static size_t event_count;
 static struct epoll_event listened_events[MaxEvents];
 
 static void add_event(int fd, uint32_t events) {
-  let had_error = epoll_ctl(*chains.fd, EPOLL_CTL_ADD, fd, &(struct epoll_event) {events, .data.fd=fd});
+  let had_error = epoll_ctl(*chains.fd, EPOLL_CTL_ADD, fd, &(struct epoll_event) {events, .data.fd=fd}) < 0;
   quit.on(had_error, "Events add failure");
 }
 static void remove_event(int fd) {

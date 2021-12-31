@@ -12,28 +12,33 @@ static const char Address[] = "127.0.0.1";
 static int server_socket;
 static struct sockaddr_in server_address;
 
-static int set_socket(void) {
-  return server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
+static void initialize_socket(void) {
+  server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
+  let had_error = server_socket < 0;
+  quit.on(had_error, "Failed to create_epoll a socket");
 }
-static int set_reusable(void) {
-  return setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &(int) {1}, sizeof(int));
+static void initialize_reusable() {
+  let had_error = setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &(int) {1}, sizeof(int)) < 0;
+  quit.on(had_error, "Failed to set socket reusable");
 }
-static int set_bind(void) {
-  return bind(server_socket, (struct sockaddr *) &server_address, sizeof(server_address));
+static void bind_server(void) {
+  let had_error = bind(server_socket, (struct sockaddr *) &server_address, sizeof(server_address)) < 0;
+  quit.on(had_error, "Failed to bind socket");
 }
-static int start_listening(void) {
-  return listen(server_socket, MaxConnections);
+static void start_listening(void) {
+  let had_error = listen(server_socket, MaxConnections) < 0;
+  quit.on(had_error, "server refused to listen");
 }
-static void set_address(void) {
+static void initialize_address(void) {
   server_address = (struct sockaddr_in) {AF_INET, htons(Port), {inet_addr(Address)}};
 }
 
 static void open_server(void) {
-  quit.on(set_socket() < 0, "Failed to create a socket");
-  quit.on(set_reusable() < 0, "Failed to set socket's options");
-  set_address();
-  quit.on(set_bind() < 0, "server refused to bind");
-  quit.on(start_listening() < 0, "server refused to listen");
+  initialize_socket();
+  initialize_reusable();
+  initialize_address();
+  bind_server();
+  start_listening();
 }
 static void close_server(void) {
   close(server_socket);
