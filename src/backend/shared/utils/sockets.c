@@ -1,12 +1,13 @@
 #include <shared/utils/sockets.h>
 #include <shared/imports.h>
+#include "console.h"
 
-char *read_socket_line(int fd) {
+static char *read_socket_line(int fd) {
   size_t buffer_size = 0;
   size_t read_buffer = 0;
   ssize_t size;
   char symbol;
-  char *buffer;
+  char *buffer = NULL;
 
   while (true) {
     size = read(fd, &symbol, 1);

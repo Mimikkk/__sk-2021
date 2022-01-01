@@ -21,8 +21,11 @@ char *str(const char *format, ...) {
   va_list arguments, size_check;
   va_start(arguments, format);
   va_copy(size_check, arguments);
-  char *buffer = (char *) malloc(vsnprintf(NULL, 0, format, size_check));
+  size_t size = vsnprintf(NULL, 0, format, size_check);
+  char *buffer = (char *) malloc(++size);
+  buffer[0] = '\0';
   vsprintf(buffer, format, arguments);
+  buffer[size] = '\0';
   va_end(arguments);
   return buffer;
 }

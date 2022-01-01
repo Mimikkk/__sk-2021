@@ -69,7 +69,7 @@ static char *event_info_callbacks(struct epoll_event event) {
 }
 static char *event_info(struct epoll_event event) {
   let info = event_info_callbacks(event);
-  let result = str("Socket '%d' with [%s] events", event.data.fd, info);
+  let result = str("Socket '%d' with [%d| %s] events", event.data.fd, event.events, info);
   return result;
 }
 
