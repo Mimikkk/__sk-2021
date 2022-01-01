@@ -1,6 +1,6 @@
 #include <shared/imports.h>
 #include <events/events.h>
-#include <events/threads/chain.h>
+#include <events/chain.h>
 #include <shared/utils/error_handle.h>
 #include <shared/utils/console.h>
 #include <ctype.h>

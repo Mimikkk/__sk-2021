@@ -3,14 +3,16 @@
 #include <shared/utils/common.h>
 #include <server/server.h>
 #include <events/events.h>
+#include "client.h"
 
-void on_input(struct epoll_event event) {
+static void on_input(struct epoll_event event) {
   let fd = server.accept();
   events.add(fd, EPOLLIN | EPOLLOUT | EPOLLHUP | EPOLLET);
+  listeners.set(fd, client_listener.create());
   console.info("Added new client socket '%d'", fd);
 }
 
-Listener create(void) {
+static Listener create(void) {
   return (Listener) {.on_input=on_input};
 }
 

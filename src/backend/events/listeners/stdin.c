@@ -1,6 +1,6 @@
 #include <events/listeners/stdin.h>
 #include <shared/utils/console.h>
-#include <events/threads/chain.h>
+#include <events/chain.h>
 
 static void on_input(struct epoll_event event) {
   console.log("Hangup");

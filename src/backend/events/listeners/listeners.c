@@ -3,6 +3,7 @@
 #include <shared/utils/error_handle.h>
 
 enum { MaxListeners = 1024 };
+
 static Listener fds[MaxListeners];
 
 Listener *get(size_t index) {
