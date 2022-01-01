@@ -6,7 +6,7 @@
 #define SO_REUSEPORT 15
 #define loop while (true)
 #define noreturn _Noreturn void
-static const int DefaultBufferSize = 1024;
+static const int DefaultBufferSize = 2048;
 
 extern char *str(const char *format, ...);
 extern char *strip(const char *str);

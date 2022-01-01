@@ -7,6 +7,10 @@ enum { MaxListeners = 1024 };
 
 static Listener fds[MaxListeners];
 
+static ListenerInfo create_listener_info(size_t fd) {
+  return (ListenerInfo) {.shook_hands =false, .fd=fd};
+}
+
 static Listener *get(size_t index) {
   quit.on(index < 0 || index >= MaxListeners, "Index out of range");
 
@@ -16,7 +20,9 @@ static Listener *get(size_t index) {
 }
 static void set(size_t index, const Listener listener) {
   quit.on(index < 0 || index >= MaxListeners, "Index out of range");
+
   fds[index] = listener;
+  fds[index].info = create_listener_info(index);
 }
 
 static void remove_listener(size_t index) {

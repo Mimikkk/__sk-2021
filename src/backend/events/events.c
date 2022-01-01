@@ -19,7 +19,6 @@ static void add_event(int fd, uint32_t events) {
   quit.on(had_error, "Events add failure");
 }
 static void remove_event(int fd) {
-  console.log("fd: %d %d", *chains.fd, fd);
   let had_error = epoll_ctl(*chains.fd, EPOLL_CTL_DEL, fd, NULL) < 0;
   quit.on(had_error, "Events remove failure");
 }
@@ -44,6 +43,8 @@ inline static bool is_writeable(struct epoll_event event) {
 }
 
 static void handle_event(struct epoll_event event) {
+  console.event(event_info(event));
+
   let listener = listeners.get(event.data.fd);
   if (is_hangup(event) && listener->on_hangup) {
     console.info("Handling hangup event");
@@ -68,17 +69,14 @@ static void handle_event(struct epoll_event event) {
 }
 static void handle_events(void) {
   console.event("Awaited '%d' events", awaited_count);
-  for (int n = 0; n < awaited_count; ++n) {
-    let event = awaited[n];
-    console.event(event_info(event));
-    handle_event(event);
-  }
+
+  for (size_t n = 0; n < awaited_count; ++n) handle_event(awaited[n]);
 }
 
 const struct events_lib events = {
         .add = add_event,
         .remove = remove_event,
-
+        
         .info = event_info,
         .await = await_events,
         .handle = handle_events,
@@ -94,7 +92,7 @@ static char *event_info_callbacks(struct epoll_event event) {
 }
 static char *event_info(struct epoll_event event) {
   let callback_types = event_info_callbacks(event);
-    let result = str("Socket '%d' with [%d| %s] events", event.data.fd, event.events, callback_types);
+  let result = str("Socket '%d' with [%d| %s] events", event.data.fd, event.events, callback_types);
   free(callback_types);
   return result;
 }

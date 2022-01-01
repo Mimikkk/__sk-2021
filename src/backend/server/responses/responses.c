@@ -2,8 +2,9 @@
 #include <shared/utils/common.h>
 #include <server/sockets.h>
 #include <malloc.h>
+#include <shared/utils/encryption.h>
 
-static response_t create_response(const char *method) {
+static response_t create(const char *method) {
   return str("%s\r\n", method);
 }
 
@@ -17,8 +18,23 @@ static void send_response(response_t response, int fd) {
   free(response);
 }
 
+static response_t handshake(const char *key) {
+  var response = create("HTTP/1.1 101 Switching Protocols");
+  add_header("Upgrade: websocket", &response);
+  add_header("Connection: Upgrade", &response);
+
+  let websocket_key = encryption.websocket(key);
+  let header = str("Sec-WebSocket-Accept: %s", websocket_key);
+  add_header(header, &response);
+
+  free(websocket_key);
+  free(header);
+  return response;
+}
+
 const struct responses_lib responses = {
-        .create = create_response,
+        .create = create,
         .add_header = add_header,
+        .handshake=handshake,
         .send = send_response,
 };

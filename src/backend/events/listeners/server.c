@@ -5,7 +5,18 @@
 #include <events/events.h>
 #include "client.h"
 
-static void on_input(struct epoll_event event) {
+static void add_new_connection(struct epoll_event event);
+
+static void handle_input(struct epoll_event event) {
+  if (listeners.get(event.data.fd)->info.shook_hands) {
+    console.event("I know '%d' exists, dobry ziomeczek :)", event.data.fd);
+    return;
+  }
+
+  add_new_connection(event);
+}
+
+static void add_new_connection(struct epoll_event event) {
   let fd = server.accept();
   events.add(fd, EPOLLIN | EPOLLOUT | EPOLLHUP | EPOLLET);
   listeners.set(fd, client_listener.create());
@@ -13,7 +24,7 @@ static void on_input(struct epoll_event event) {
 }
 
 static Listener create(void) {
-  return (Listener) {.on_input=on_input};
+  return (Listener) {.on_input=handle_input};
 }
 
 const struct server_listener_t server_listener = {
