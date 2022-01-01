@@ -1,6 +1,8 @@
-#include <shared/utils/sockets.h>
+#include <server/sockets.h>
 #include <shared/imports.h>
-#include "console.h"
+#include <events/listeners/listeners.h>
+#include <events/chain.h>
+#include "shared/utils/console.h"
 
 static char *read_socket_line(int fd) {
   size_t buffer_size = 0;
@@ -33,6 +35,16 @@ static char *read_socket_line(int fd) {
   return buffer;
 }
 
+static void send_response(int fd, const char *response) {
+  send(fd, response, strlen(response), 0);
+}
+static void close_socket(int fd) {
+  close(fd);
+  listeners.set(fd, (Listener) {});
+}
+
 const struct sockets_lib sockets = {
-        .readline = read_socket_line
+        .close=close_socket,
+        .readline = read_socket_line,
+        .send = send_response,
 };

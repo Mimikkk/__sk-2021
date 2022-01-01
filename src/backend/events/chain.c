@@ -21,7 +21,7 @@ static void create_epoll(void) {
 static void handle_events(void) {
   for (int n = 0; n < *events.awaited_count; ++n) {
     let event = events.awaited[n];
-    console.log(events.info(event));
+    console.event(events.info(event));
     events.handle(event);
   }
 }
@@ -29,11 +29,12 @@ static void handle_events(void) {
 static void epoll_initialize(void) {
   create_epoll();
 
-  console.info("Added server socket and stdin to await_events.");
+  console.info("Added server socket and stdin to await_events");
   events.add(*server.socket, EPOLLIN | EPOLLET);
   events.add(InputFd, EPOLLIN | EPOLLET);
   listeners.set(InputFd, stdin_listener.create());
   listeners.set(*server.socket, server_listener.create());
+
   console.info("Epoll awaiting events...");
   while (is_running) {
     events.await();
@@ -43,7 +44,7 @@ static void epoll_initialize(void) {
 
 void stop(void) {
   is_running = false;
-  console.info("Epoll exiting.");
+  console.info("Epoll exiting");
 }
 
 const struct chain_lib chains = {

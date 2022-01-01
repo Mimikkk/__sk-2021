@@ -1,26 +1,23 @@
 #include <events/listeners/client.h>
 #include <shared/utils/encryption.h>
 #include <shared/utils/console.h>
-#include <shared/utils/sockets.h>
+#include <server/sockets.h>
 #include <string.h>
 #include <stdio.h>
 #include <malloc.h>
 #include <shared/utils/common.h>
-#include <sys/socket.h>
 
-static char *const response1 = "HTTP/1.1 101 Switching Protocols\r\n" \
-"Upgrade: websocket\r\n" \
-"Connection: Upgrade\r\n" \
-"Sec-WebSocket-Accept: ";
-static char *const response2 = "\r\n\r\n";
+static char *create_handshake_response(const char *key) {
+  var response = responses.create("HTTP/1.1 101 Switching Protocols");
+  responses.add_header("Upgrade: websocket", &response);
+  responses.add_header("Connection: Upgrade", &response);
 
-static char *create_handshake_response(char *key) {
-  char *response = malloc(strlen(response1) + strlen(response2) + strlen(key) + 1);
-  response[0] = '\0';
+  let websocket_key = encryption.websocket(key);
+  let header = str("Sec-WebSocket-Accept: %s", websocket_key);
+  responses.add_header(header, &response);
 
-  strcat(response, response1);
-  strcat(response, key);
-  strcat(response, response2);
+  free(websocket_key);
+  free(header);
   return response;
 }
 
@@ -28,24 +25,30 @@ static void on_input(struct epoll_event event) {
   static const char *const WebSocketWildcard = "Sec-WebSocket-Key: %s";
   static const char *const WebSocketKey = "Sec-WebSocket-Key:";
 
+  response_t handshake_response = NULL;
   char *line;
-  char *key = malloc(1024);
+  char *key = malloc(DefaultBufferSize);
   while ((line = sockets.readline(event.data.fd)) != NULL) {
-    console.log("Read from socket: [%s]", line);
-    if (strstr(line, WebSocketKey) && sscanf(line, WebSocketWildcard, key)) {
-
-      console.log("Found websocket key: [%s]", str(key));
-      console.log("Expects to receive: [%s]", create_handshake_response(encryption.websocket(key)));
-      let x = create_handshake_response(encryption.websocket(key));
-      send(event.data.fd, x, strlen(x), 0);
+    console.info("Read from socket: [%s]", line);
+    if (strstr(line, WebSocketKey)) {
+      sscanf(line, WebSocketWildcard, key);
+      console.info("Found websocket key: [%s]", key);
+      handshake_response = create_handshake_response(key);
+      console.info("Created handshake protocol");
     }
   }
-  
+
+  responses.send(handshake_response, event.data.fd);
+}
+static void on_hangup(struct epoll_event event) {
+  console.info("Client disconnected");
+  sockets.close(event.data.fd);
+  listeners.remove(event.data.fd);
+  listeners.premature_exit(event.data.fd);
 }
 
-
 static Listener create(void) {
-  return (Listener) {.on_input=on_input};
+  return (Listener) {.on_input=on_input, .on_hangup=on_hangup};
 }
 
 const struct client_listener_t client_listener = {

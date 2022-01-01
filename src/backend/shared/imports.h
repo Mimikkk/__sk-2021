@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <time.h>
 #include <netdb.h>
+#include <malloc.h>
 #include <signal.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>

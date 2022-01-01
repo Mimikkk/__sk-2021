@@ -39,37 +39,42 @@ inline static bool is_writeable(struct epoll_event event) {
 }
 
 static void handle_event(struct epoll_event event) {
-  let listener = *listeners.get(event.data.fd);
-  if (is_hangup(event) && listener.on_hangup) {
-    listener.on_hangup(event);
-    if (listener.should_exit) return;
+  let listener = listeners.get(event.data.fd);
+  if (is_hangup(event) && listener->on_hangup) {
+    console.info("Handling hangup event");
+    listener->on_hangup(event);
+    if (listener->should_exit) return;
   }
-  if (is_error(event) && listener.on_error) {
-    listener.on_error(event);
-    if (listener.should_exit) return;
+  if (is_error(event) && listener->on_error) {
+    console.info("Handling error event");
+    listener->on_error(event);
+    if (listener->should_exit) return;
   }
-  if (is_readable(event) && listener.on_input) {
-    listener.on_input(event);
-    if (listener.should_exit) return;
+  if (is_readable(event) && listener->on_input) {
+    console.info("Handling read event");
+    listener->on_input(event);
+    if (listener->should_exit) return;
   }
-  if (is_writeable(event) && listener.on_output) {
-    listener.on_output(event);
-    if (listener.should_exit) return;
+  if (is_writeable(event) && listener->on_output) {
+    console.info("Handling write event");
+    listener->on_output(event);
+    if (listener->should_exit) return;
   }
 }
 
 static char *event_info_callbacks(struct epoll_event event) {
-  var info = (char*)malloc(sizeof(char) * 1024);
-  if (is_hangup(event)) strcat(info, "hangup ");
-  if (is_error(event)) strcat(info, "error ");
-  if (is_readable(event)) strcat(info, "input ");
-  if (is_writeable(event)) strcat(info, "output ");
+  var info = "";
+  if (is_hangup(event)) info = str("%s%s", info, "hangup ");
+  if (is_error(event)) info = str("%s%s", info, "error ");
+  if (is_readable(event)) info = str("%s%s", info, "read ");
+  if (is_writeable(event)) info = str("%s%s", info, "write ");
   var result = strip(info);
   return result;
 }
 static char *event_info(struct epoll_event event) {
   let info = event_info_callbacks(event);
   let result = str("Socket '%d' with [%d| %s] events", event.data.fd, event.events, info);
+  free(info);
   return result;
 }
 

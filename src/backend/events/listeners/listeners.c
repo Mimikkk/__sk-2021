@@ -6,19 +6,28 @@ enum { MaxListeners = 1024 };
 
 static Listener fds[MaxListeners];
 
-Listener *get(size_t index) {
+static Listener *get(size_t index) {
   quit.on(index < 0 || index >= MaxListeners, "Index out of range");
 
   var listener = &fds[index];
   listener->should_exit = false;
   return listener;
 }
-void set(size_t index, const Listener listener) {
+static void set(size_t index, const Listener listener) {
   quit.on(index < 0 || index >= MaxListeners, "Index out of range");
   fds[index] = listener;
+}
+
+static void remove_listener(size_t index) {
+  fds[index] = (Listener) {};
+}
+static void premature_exit(size_t fd) {
+  listeners.get(fd)->should_exit = true;
 }
 
 const struct listeners_lib listeners = {
         .get = get,
         .set = set,
+        .remove = remove_listener,
+        .premature_exit = premature_exit,
 };

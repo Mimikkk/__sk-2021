@@ -1,8 +1,8 @@
 #include <shared/utils/console.h>
 #include <shared/utils/error_handle.h>
+#include <events/threads/thread.h>
 #include <server/server.h>
 #include <events/chain.h>
-#include <events/threads/thread.h>
 #include <unistd.h>
 
 int main(void) {
