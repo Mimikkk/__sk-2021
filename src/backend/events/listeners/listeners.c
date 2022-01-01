@@ -1,6 +1,7 @@
 #include <events/listeners/listeners.h>
 #include <shared/utils/common.h>
 #include <shared/utils/error_handle.h>
+#include <malloc.h>
 
 enum { MaxListeners = 1024 };
 
@@ -19,15 +20,16 @@ static void set(size_t index, const Listener listener) {
 }
 
 static void remove_listener(size_t index) {
-  fds[index] = (Listener) {};
+  set(index, (Listener) {});
 }
-static void premature_exit(size_t fd) {
-  listeners.get(fd)->should_exit = true;
+static void premature_exit(size_t index) {
+  get(index)->should_exit = true;
 }
 
 const struct listeners_lib listeners = {
         .get = get,
         .set = set,
+
         .remove = remove_listener,
         .premature_exit = premature_exit,
 };

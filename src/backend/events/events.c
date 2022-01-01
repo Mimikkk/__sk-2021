@@ -8,20 +8,25 @@
 
 enum { MaxEvents = 10 };
 
-static size_t event_count;
-static struct epoll_event listened[MaxEvents];
+static size_t awaited_count;
+static struct epoll_event awaited[MaxEvents];
+
+static char *event_info_callbacks(struct epoll_event event);
+static char *event_info(struct epoll_event event);
 
 static void add_event(int fd, uint32_t events) {
   let had_error = epoll_ctl(*chains.fd, EPOLL_CTL_ADD, fd, &(struct epoll_event) {events, .data.fd=fd}) < 0;
   quit.on(had_error, "Events add failure");
 }
 static void remove_event(int fd) {
+  console.log("fd: %d %d", *chains.fd, fd);
   let had_error = epoll_ctl(*chains.fd, EPOLL_CTL_DEL, fd, NULL) < 0;
   quit.on(had_error, "Events remove failure");
 }
+
 static void await_events(void) {
-  event_count = epoll_wait(*chains.fd, listened, MaxEvents, -1);
-  let had_error = event_count < 0;
+  awaited_count = epoll_wait(*chains.fd, awaited, MaxEvents, -1);
+  let had_error = awaited_count < 0;
   quit.on(had_error, "Epoll wait error");
 }
 
@@ -61,6 +66,23 @@ static void handle_event(struct epoll_event event) {
     if (listener->should_exit) return;
   }
 }
+static void handle_events(void) {
+  console.event("Awaited '%d' events", awaited_count);
+  for (int n = 0; n < awaited_count; ++n) {
+    let event = awaited[n];
+    console.event(event_info(event));
+    handle_event(event);
+  }
+}
+
+const struct events_lib events = {
+        .add = add_event,
+        .remove = remove_event,
+
+        .info = event_info,
+        .await = await_events,
+        .handle = handle_events,
+};
 
 static char *event_info_callbacks(struct epoll_event event) {
   var info = "";
@@ -68,22 +90,11 @@ static char *event_info_callbacks(struct epoll_event event) {
   if (is_error(event)) info = str("%s%s", info, "error ");
   if (is_readable(event)) info = str("%s%s", info, "read ");
   if (is_writeable(event)) info = str("%s%s", info, "write ");
-  var result = strip(info);
-  return result;
+  return strip(info);
 }
 static char *event_info(struct epoll_event event) {
-  let info = event_info_callbacks(event);
-  let result = str("Socket '%d' with [%d| %s] events", event.data.fd, event.events, info);
-  free(info);
+  let callback_types = event_info_callbacks(event);
+    let result = str("Socket '%d' with [%d| %s] events", event.data.fd, event.events, callback_types);
+  free(callback_types);
   return result;
 }
-
-const struct events_lib events = {
-        .add = add_event,
-        .await = await_events,
-        .handle = handle_event,
-        .info = event_info,
-
-        .awaited_count = &event_count,
-        .awaited = listened,
-};

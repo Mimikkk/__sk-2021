@@ -18,14 +18,6 @@ static void create_epoll(void) {
   quit.on(had_error, "Epoll creation failure");
 }
 
-static void handle_events(void) {
-  for (int n = 0; n < *events.awaited_count; ++n) {
-    let event = events.awaited[n];
-    console.event(events.info(event));
-    events.handle(event);
-  }
-}
-
 static void epoll_initialize(void) {
   create_epoll();
 
@@ -38,7 +30,7 @@ static void epoll_initialize(void) {
   console.info("Epoll awaiting events...");
   while (is_running) {
     events.await();
-    handle_events();
+    events.handle();
   }
 }
 

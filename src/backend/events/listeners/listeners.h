@@ -14,6 +14,7 @@ typedef struct listener_t {
 extern const struct listeners_lib {
     Listener *(*get)(size_t);
     void (*set)(size_t, Listener);
+
     void (*remove)(size_t);
     void (*premature_exit)(size_t);
 } listeners;

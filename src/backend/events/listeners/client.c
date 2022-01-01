@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <shared/utils/common.h>
+#include <events/events.h>
 
 static char *create_handshake_response(const char *key) {
   var response = responses.create("HTTP/1.1 101 Switching Protocols");
@@ -41,14 +42,14 @@ static void on_input(struct epoll_event event) {
   responses.send(handshake_response, event.data.fd);
 }
 static void on_hangup(struct epoll_event event) {
-  console.info("Client disconnected");
-  sockets.close(event.data.fd);
+  console.event("Removing socket '%d' from watch", event.data.fd);
+
+  events.remove(event.data.fd);
   listeners.remove(event.data.fd);
   listeners.premature_exit(event.data.fd);
 }
-
 static Listener create(void) {
-  return (Listener) {.on_input=on_input, .on_hangup=on_hangup};
+  return (Listener) {.on_input=on_input, .on_hangup=on_hangup, .on_error=on_hangup, .should_exit=false};
 }
 
 const struct client_listener_t client_listener = {
