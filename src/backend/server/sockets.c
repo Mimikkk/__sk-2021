@@ -38,9 +38,18 @@ static void close_socket(int fd) {
   listeners.set(fd, (Listener) {});
 }
 
+static bool try_read(int fd, void *data, size_t n) {
+  return read(fd, data, n) == n;
+}
+static bool try_write(int fd, void *data, size_t n) {
+  return write(fd, data, n) == n;
+}
+
 const struct sockets_lib sockets = {
         .close=close_socket,
         .readline = read_socket_line,
         .send = send_response,
-        .read = read,
+        .read = (void (*)(int, void *, size_t)) read,
+        .try_read = try_read,
+        .try_write = try_write,
 };
