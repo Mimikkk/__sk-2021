@@ -68,7 +68,7 @@ static void handle_event(struct epoll_event event) {
   }
 }
 static void handle_events(void) {
-  console.event("Awaited '%d' events", awaited_count);
+  console.event("Awaited '%d' event/s", awaited_count);
 
   for (size_t n = 0; n < awaited_count; ++n) handle_event(awaited[n]);
 }
@@ -92,7 +92,7 @@ static char *event_info_callbacks(struct epoll_event event) {
 }
 static char *event_info(struct epoll_event event) {
   let callback_types = event_info_callbacks(event);
-  let result = str("Socket '%d' with [%d| %s] events", event.data.fd, event.events, callback_types);
+  let result = str("Socket '%d' with [%d| %s] event/s", event.data.fd, event.events, callback_types);
   free(callback_types);
   return result;
 }

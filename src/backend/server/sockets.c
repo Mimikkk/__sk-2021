@@ -6,7 +6,7 @@
 
 static char *read_socket_line(int fd) {
   size_t buffer_size = 0;
-  size_t read_buffer = 0;
+  size_t read_buffer_size = 0;
   ssize_t size;
   char symbol;
   char *buffer = NULL;
@@ -18,20 +18,15 @@ static char *read_socket_line(int fd) {
       return NULL;
     }
 
-    if (symbol == '\n') break;
 
-    // is more memory needed?
-    if (!buffer_size || read_buffer == buffer_size) buffer = realloc(buffer, buffer_size += 128);
-    buffer[read_buffer++] = symbol;
+    if (symbol == '\n') break;
+    if (!buffer_size || read_buffer_size == buffer_size) buffer = realloc(buffer, buffer_size += 128);
+    buffer[read_buffer_size++] = symbol;
   }
 
-  // if the line was terminated by "\r\n", ignore the
-  // "\r". the "\n" is not in the buffer
-  if (read_buffer > 0 && buffer[read_buffer - 1] == '\r') --read_buffer;
-
-  // is more memory needed?
-  if (!buffer_size || read_buffer == buffer_size) buffer = realloc(buffer, ++buffer_size);
-  buffer[read_buffer] = '\0';
+  if (read_buffer_size > 0 && buffer[read_buffer_size - 1] == '\r') --read_buffer_size;
+  if (!buffer_size || read_buffer_size == buffer_size) buffer = realloc(buffer, buffer_size + 1);
+  buffer[read_buffer_size] = '\0';
   return buffer;
 }
 
@@ -47,4 +42,5 @@ const struct sockets_lib sockets = {
         .close=close_socket,
         .readline = read_socket_line,
         .send = send_response,
+        .read = read,
 };

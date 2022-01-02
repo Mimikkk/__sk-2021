@@ -18,7 +18,7 @@ static void handle_input(struct epoll_event event) {
 
 static void add_new_connection(struct epoll_event event) {
   let fd = server.accept();
-  events.add(fd, EPOLLIN | EPOLLOUT | EPOLLHUP | EPOLLET);
+  events.add(fd, EPOLLIN | EPOLLOUT | EPOLLHUP | EPOLLERR | EPOLLET);
   listeners.set(fd, client_listener.create());
   console.info("Added new client socket '%d'", fd);
 }

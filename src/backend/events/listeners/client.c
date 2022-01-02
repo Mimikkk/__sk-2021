@@ -7,6 +7,9 @@
 #include <malloc.h>
 #include <shared/utils/common.h>
 #include <events/events.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <server/responses/datagrams.h>
 
 static response_t current_response = NULL;
 
@@ -36,20 +39,19 @@ static void read_hand(struct epoll_event event) {
   listeners.get(event.data.fd)->on_output = shake_hand;
 }
 static void just_read(struct epoll_event event) {
-  console.info("just reading :)");
-
-  char *line;
-  while ((line = sockets.readline(event.data.fd)) != NULL) {
-    console.info("Read from socket: [%s]", line);
-  }
+  console.info("just reading a datagram :)");
+  let fd = event.data.fd;
+  let datagram = datagrams.read(fd);
+  console.log("frame data [%s]", datagram);
 }
+
 static void shake_hand(struct epoll_event event) {
   console.event("Shook hands with '%d'", event.data.fd);
 
   responses.send(current_response, event.data.fd);
 
   var listener = listeners.get(event.data.fd);
-  listener->info.shook_hands = true; 
+  listener->info.shook_hands = true;
   listener->on_output = NULL;
 }
 
