@@ -1,32 +1,37 @@
 import './App.scss';
 import { useSocket } from './hooks';
-import { isConnected, isDisconnected } from './hooks/useSocket/socket-status';
 import { Logger } from './components/devtools/Logger';
 
 const server_url = import.meta.env.VITE_SERVER_URL;
 
 export const ClientView = () => {
-  const { socket, status } = useSocket(`ws://${server_url}`);
+  const { socket } = useSocket(`ws://${server_url}`);
 
   return (
     <div>
       <button
         type="button"
         onClick={() => {
-          console.log(status);
-          if (isDisconnected(status)) {
-            socket.onopen = () => console.log('Connected');
-            socket.onclose = () => console.log('Close');
-            socket.onmessage = console.log;
-            socket.onerror = console.log;
-          } else if (isConnected(status)) {
-            socket.close();
-          }
+          console.log('I love you..');
+          socket.send(
+            'I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..I love you..',
+          );
         }}
       >
-        Socket is {status}
+        Send lots of love
       </button>
-      <p>Socket on {socket.url}.</p>
+      <button
+        type="button"
+        onClick={() => {
+          console.log('Cheers love!');
+          socket.send('Cheers love!');
+        }}
+      >
+        Send some love
+      </button>
+      <p>
+        Socket on {socket.url} and is {status}
+      </p>
     </div>
   );
 };

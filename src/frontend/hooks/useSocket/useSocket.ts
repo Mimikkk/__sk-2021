@@ -1,18 +1,29 @@
-import { useEffect, useRef } from 'react';
-import { SocketStatus, toStatus } from './socket-status';
+import { useCallback, useEffect, useRef } from 'react';
 
 interface UseSocket {
   socket: WebSocket;
-  status: SocketStatus;
+  reconnect: () => void;
 }
+
 export const useSocket = (url: string): UseSocket => {
   const socket = useRef(new WebSocket(url));
-  useEffect(() => {
+
+  const closeSocket = useCallback(socket.current.close, [socket]);
+
+  const reconnect = useCallback(() => {
     socket.current = new WebSocket(url);
+
+    const s = socket.current;
+    s.addEventListener('message', (event) => {
+      console.log({ event });
+    });
   }, [url]);
 
-  return {
-    socket: socket.current,
-    status: toStatus(socket.current.readyState),
-  } as const;
+  console.log('Fuck you?');
+  useEffect(() => {
+    reconnect();
+    return closeSocket;
+  }, [url]);
+
+  return { socket: socket.current, reconnect } as const;
 };
