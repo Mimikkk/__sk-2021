@@ -35,6 +35,6 @@ static response_t handshake(const char *key) {
 const struct responses_lib responses = {
         .create = create,
         .add_header = add_header,
-        .handshake=handshake,
+        .handshake = handshake,
         .send = send_response,
 };

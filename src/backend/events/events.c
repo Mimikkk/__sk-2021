@@ -76,7 +76,7 @@ static void handle_events(void) {
 const struct events_lib events = {
         .add = add_event,
         .remove = remove_event,
-        
+
         .info = event_info,
         .await = await_events,
         .handle = handle_events,
@@ -92,7 +92,7 @@ static char *event_info_callbacks(struct epoll_event event) {
 }
 static char *event_info(struct epoll_event event) {
   let callback_types = event_info_callbacks(event);
-  let result = str("Socket '%d' with [%d| %s] event/s", event.data.fd, event.events, callback_types);
+  let result = str("Socket '%d' ready with [%d| %s] event/s", event.data.fd, event.events, callback_types);
   free(callback_types);
   return result;
 }

@@ -2,9 +2,12 @@
 #include <stddef.h>
 #include <sys/epoll.h>
 #include <stdbool.h>
+#include <server/responses/responses.h>
 
 typedef struct listener_info_t {
     bool shook_hands;
+    response_t response;
+    const char *name;
     size_t fd;
 } ListenerInfo;
 
@@ -23,5 +26,6 @@ extern const struct listeners_lib {
 
     void (*remove)(size_t);
     void (*premature_exit)(size_t);
+    bool (*contains_name)(const char *);
 
 } listeners;

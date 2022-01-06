@@ -8,14 +8,8 @@
 static void add_new_connection(struct epoll_event event);
 
 static void handle_input(struct epoll_event event) {
-  if (listeners.get(event.data.fd)->info.shook_hands) {
-    console.event("I know '%d' exists, dobry ziomeczek :)", event.data.fd);
-    return;
-  }
-
   add_new_connection(event);
 }
-
 static void add_new_connection(struct epoll_event event) {
   let fd = server.accept();
   events.add(fd, EPOLLIN | EPOLLOUT | EPOLLHUP | EPOLLERR | EPOLLET);

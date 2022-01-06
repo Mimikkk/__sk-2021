@@ -11,46 +11,60 @@
 #include <sys/socket.h>
 #include <server/responses/datagrams.h>
 
-static response_t current_response = NULL;
-
 static void shake_hand(struct epoll_event event);
 static void read_hand(struct epoll_event event);
 static void just_read(struct epoll_event event);
+static void handle_unexpected(struct epoll_event event);
 
 static void read_hand(struct epoll_event event) {
   static const char *const WebSocketWildcard = "Sec-WebSocket-Key: %s";
   static const char *const WebSocketKey = "Sec-WebSocket-Key:";
+  static const char *const NameWildcard = "GET /%s ";
+  static const char *const NameKey = "GET /";
+
+  let fd = event.data.fd;
+  var listener = listeners.get(fd);
 
   char *line;
-  char *key = malloc(DefaultBufferSize);
-  while ((line = sockets.readline(event.data.fd)) != NULL) {
+  char *buffer = malloc(DefaultBufferSize);
+  while ((line = sockets.readline(fd)) != NULL) {
     console.info("Read from socket: [%s]", line);
-    if (strstr(line, WebSocketKey)) {
-      sscanf(line, WebSocketWildcard, key);
-      console.info("Found websocket key: [%s]", key);
-      current_response = responses.handshake(key);
+    if (strstr(line, NameKey)) {
+      sscanf(line, NameWildcard, buffer);
+      console.info("Found name: [%s]", buffer);
+      if (listeners.contains_name(buffer)) {
+        console.error("Contains duplicate socket identified as '%s'", buffer);
+        free(buffer);
+        return handle_unexpected(event);
+      }
+      listener->info.name = str(buffer);
+    } else if (strstr(line, WebSocketKey)) {
+      sscanf(line, WebSocketWildcard, buffer);
+      console.info("Found websocket key: [%s]", buffer);
+
+      listener->info.response = responses.handshake(buffer);
       console.event("Created handshake protocol");
     }
   }
 
-  free(key);
+  free(buffer);
   free(line);
-  listeners.get(event.data.fd)->on_input = just_read;
-  listeners.get(event.data.fd)->on_output = shake_hand;
+  listener->on_input = just_read;
+  listener->on_output = shake_hand;
 }
 static void just_read(struct epoll_event event) {
   console.info("just reading a datagram :)");
   let fd = event.data.fd;
   let datagram = datagrams.read(fd);
-  console.log("frame data [%s]", datagram);
+  console.log("frame data: [%s]", datagram);
 }
 
 static void shake_hand(struct epoll_event event) {
-  console.event("Shook hands with '%d'", event.data.fd);
+  let fd = event.data.fd;
+  var listener = listeners.get(fd);
 
-  responses.send(current_response, event.data.fd);
-
-  var listener = listeners.get(event.data.fd);
+  console.event("Shook hands with '%s' at '%d'", listener->info.name, fd);
+  responses.send(listener->info.response, fd);
   listener->info.shook_hands = true;
   listener->on_output = NULL;
 }

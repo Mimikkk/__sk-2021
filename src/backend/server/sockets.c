@@ -2,6 +2,7 @@
 #include <shared/imports.h>
 #include <events/listeners/listeners.h>
 #include <events/chain.h>
+#include <shared/utils/common.h>
 #include "shared/utils/console.h"
 
 static char *read_socket_line(int fd) {
@@ -39,10 +40,14 @@ static void close_socket(int fd) {
 }
 
 static bool try_read(int fd, void *data, size_t n) {
-  return read(fd, data, n) == n;
+  let had_error = read(fd, data, n) != n;
+  if (had_error) console.error("failed to read %d bytes", n);
+  return !had_error;
 }
-static bool try_write(int fd, void *data, size_t n) {
-  return write(fd, data, n) == n;
+static bool try_send(int fd, void *data, size_t n) {
+  let had_error = write(fd, data, n) != n;
+  if (had_error) console.error("failed to send %d bytes", n);
+  return !had_error;
 }
 
 const struct sockets_lib sockets = {
@@ -51,5 +56,5 @@ const struct sockets_lib sockets = {
         .send = send_response,
         .read = (void (*)(int, void *, size_t)) read,
         .try_read = try_read,
-        .try_write = try_write,
+        .try_send = try_send,
 };

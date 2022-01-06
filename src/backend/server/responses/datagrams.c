@@ -19,28 +19,28 @@ enum {
 
 static unsigned char *buffer;
 static void close_response(int fd) {
-  if (!sockets.try_write(fd, &(unsigned char[2]) {FinishBitLayout | CloseOperation, 0x00}, 2))
-    console.log("Failed to write close response");
+  if (!sockets.try_send(fd, &(unsigned char[2]) {FinishBitLayout | CloseOperation, 0x00}, 2))
+    console.error("Failed to write close response");
 }
 
 static bool ping_response(int fd, uint64_t len, const unsigned char masking_key[4]) {
   buffer = calloc(8, sizeof(char));
 
   buffer[0] = FinishBitLayout | PongOperation;
-  if (!sockets.try_write(fd, buffer, 1)) return false;
+  if (!sockets.try_send(fd, buffer, 1)) return false;
 
   if (len < 126) {
     buffer[0] = len & 0x7F;
-    if (!sockets.try_write(fd, buffer, 1)) return false;
+    if (!sockets.try_send(fd, buffer, 1)) return false;
   } else if (len < (1 << 16)) {
     buffer[0] = 126;
-    if (!sockets.try_write(fd, buffer, 1)) return false;
+    if (!sockets.try_send(fd, buffer, 1)) return false;
     buffer[0] = (len >> 8) & 0xFF;
     buffer[1] = len & 0xFF;
-    if (!sockets.try_write(fd, buffer, 2)) return false;
+    if (!sockets.try_send(fd, buffer, 2)) return false;
   } else {
     buffer[0] = 127;
-    if (!sockets.try_write(fd, buffer, 1)) return false;
+    if (!sockets.try_send(fd, buffer, 1)) return false;
     buffer[0] = (len >> 56) & 0xFF;
     buffer[1] = (len >> 48) & 0xFF;
     buffer[2] = (len >> 40) & 0xFF;
@@ -49,13 +49,13 @@ static bool ping_response(int fd, uint64_t len, const unsigned char masking_key[
     buffer[5] = (len >> 16) & 0xFF;
     buffer[6] = (len >> 8) & 0xFF;
     buffer[7] = len & 0xFF;
-    if (!sockets.try_write(fd, buffer, 8)) return false;
+    if (!sockets.try_send(fd, buffer, 8)) return false;
   }
 
   for (size_t i = 0; i < len; i++) {
     if (!sockets.try_read(fd, buffer, 1)) return false;
     buffer[0] ^= masking_key[i % 4];
-    if (!sockets.try_write(fd, buffer, 1)) return false;
+    if (!sockets.try_send(fd, buffer, 1)) return false;
   }
   return true;
 }
@@ -71,10 +71,7 @@ static uint64_t check_for_extra(uint64_t len) {
   }
 }
 static uint64_t find_size_with_extra(int fd, uint64_t extra) {
-  if (!sockets.try_read(fd, buffer, extra)) {
-    console.error("failed to read extra len size");
-    return -1;
-  }
+  if (!sockets.try_read(fd, buffer, extra)) return -1;
 
   var len = 0;
   for (size_t i = 0; i < extra; ++i) len = (len << 8) + buffer[i];
@@ -97,11 +94,7 @@ static char *read_response(int fd) {
   char *data = calloc(DefaultBufferSize, sizeof(char));
 
   do {
-    console.log("dupa");
-    if (!sockets.try_read(fd, buffer, 2)) {
-      console.error("failed to read frame header");
-      return NULL;
-    }
+    if (!sockets.try_read(fd, buffer, 2)) return NULL;
 
     is_fin = buffer[0] & FinishBitLayout;
     opcode = buffer[0] & 0x0F;
@@ -113,10 +106,7 @@ static char *read_response(int fd) {
       return NULL;
     }
 
-    if (!sockets.try_read(fd, masking_key, 4)) {
-      console.error("failed to read mask bytes");
-      return NULL;
-    }
+    if (!sockets.try_read(fd, masking_key, 4)) return NULL;
 
     switch (opcode) {
       case CloseOperation:
@@ -126,14 +116,11 @@ static char *read_response(int fd) {
         if (!ping_response(fd, len, masking_key)) console.error("failed to send ping response");
         return NULL;
       case PongOperation:
-        if (!sockets.try_read(fd, NULL, len)) console.error("failed to read len byte");
+        sockets.try_read(fd, NULL, len);
         return NULL;
       case TextReadOperation:
       case ContinueReadOperation:
-        if (!sockets.try_read(fd, &data[current_offset], len)) {
-          console.log("failed to read %d bytes", len);
-          return NULL;
-        }
+        if (!sockets.try_read(fd, &data[current_offset], len)) return NULL;
 
         for (size_t i = 0; i < len; ++i) ((unsigned char *) data)[current_offset + i] ^= masking_key[i % 4];
         current_offset += len;

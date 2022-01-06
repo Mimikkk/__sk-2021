@@ -9,5 +9,5 @@ extern const struct sockets_lib {
     void (*send)(int, const char *);
     void (*read)(int, void *, size_t);
     bool (*try_read)(int, void *, size_t);
-    bool (*try_write)(int, void *, size_t);
+    bool (*try_send)(int, void *, size_t);
 } sockets;

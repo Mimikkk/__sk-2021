@@ -2,6 +2,7 @@
 #include <shared/utils/common.h>
 #include <shared/utils/error_handle.h>
 #include <malloc.h>
+#include <string.h>
 
 enum { MaxListeners = 1024 };
 
@@ -31,6 +32,11 @@ static void remove_listener(size_t index) {
 static void premature_exit(size_t index) {
   get(index)->should_exit = true;
 }
+static bool contains_name(const char *name) {
+  for (size_t i = 0; i < MaxListeners; ++i) if (fds[i].info.name && strcmp(fds[i].info.name, name) == 0) return true;
+  return false;
+}
+
 
 const struct listeners_lib listeners = {
         .get = get,
@@ -38,4 +44,5 @@ const struct listeners_lib listeners = {
 
         .remove = remove_listener,
         .premature_exit = premature_exit,
+        .contains_name = contains_name,
 };
