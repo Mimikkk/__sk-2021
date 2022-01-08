@@ -19,11 +19,11 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": "./src/frontend",
-    "rootDir": "./src/frontend"
+    "baseUrl": "./src/frontend/",
   },
   "include": [
-    "src/frontend"
+    "src/frontend",
+    "src/frontend/**"
   ],
   "exclude": [
     "cmake-build-debug",
