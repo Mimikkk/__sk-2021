@@ -6,11 +6,14 @@
 
 enum { MaxListeners = 1024 };
 
-static Listener fds[MaxListeners];
-
-static ListenerInfo create_listener_info(size_t fd) {
-  return (ListenerInfo) {.shook_hands =false, .fd=fd};
+static ListenerInfo empty_info() {
+  return (ListenerInfo) {};
 }
+static Listener empty(void) {
+  return (Listener) {};
+}
+
+static Listener fds[MaxListeners];
 
 static Listener *get(size_t index) {
   quit.on(index < 0 || index >= MaxListeners, "Index out of range");
@@ -23,12 +26,12 @@ static void set(size_t index, const Listener listener) {
   quit.on(index < 0 || index >= MaxListeners, "Index out of range");
 
   fds[index] = listener;
-  fds[index].info = create_listener_info(index);
+  fds[index].info = empty_info();
+}
+static void clear(size_t fd) {
+  set(fd, empty());
 }
 
-static void remove_listener(size_t index) {
-  set(index, (Listener) {});
-}
 static void premature_exit(size_t index) {
   get(index)->should_exit = true;
 }
@@ -37,12 +40,12 @@ static bool contains_name(const char *name) {
   return false;
 }
 
-
 const struct listeners_lib listeners = {
         .get = get,
         .set = set,
+        .empty = empty,
+        .clear = clear,
 
-        .remove = remove_listener,
         .premature_exit = premature_exit,
         .contains_name = contains_name,
 };

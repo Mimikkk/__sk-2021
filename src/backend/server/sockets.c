@@ -36,12 +36,12 @@ static void send_response(int fd, const char *response) {
 }
 static void close_socket(int fd) {
   close(fd);
-  listeners.set(fd, (Listener) {});
+  listeners.clear(fd);
 }
 
 static bool try_read(int fd, void *data, size_t n) {
   let had_error = read(fd, data, n) != n;
-  if (had_error) console.error("failed to read %d bytes", n);
+  if (had_error) console.error("failed to try_read %d bytes", n);
   return !had_error;
 }
 static bool try_send(int fd, void *data, size_t n) {

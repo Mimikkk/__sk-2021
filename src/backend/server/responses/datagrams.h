@@ -2,5 +2,6 @@
 #include <stddef.h>
 
 extern const struct datagrams_lib {
-    char* (*read)(int);
+    char *(*try_read)(int);
+    void (*write)(int, const char *);
 } datagrams;

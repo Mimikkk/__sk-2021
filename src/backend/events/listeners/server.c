@@ -3,7 +3,7 @@
 #include <shared/utils/common.h>
 #include <server/server.h>
 #include <events/events.h>
-#include "client.h"
+#include "events/listeners/client/client.h"
 
 static void add_new_connection(struct epoll_event event) {
   let fd = server.accept();

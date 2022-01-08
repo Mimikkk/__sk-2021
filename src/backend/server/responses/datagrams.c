@@ -4,15 +4,18 @@
 #include <server/sockets.h>
 #include <malloc.h>
 #include <stdint.h>
+#include <string.h>
 
 enum {
     ContinueReadOperation = 0x0,
-    TextReadOperation = 0x1,
+    TextOperation = 0x1,
+    BinaryOperation = 0x2,
     CloseOperation = 0x8,
     PingOperation = 0x9,
     PongOperation = 0xA,
 };
 enum {
+    WebsocketHeaderSize = 10,
     FinishBitLayout = 0x80,
     MaskBitLayout = 0x80,
 };
@@ -118,7 +121,7 @@ static char *read_response(int fd) {
       case PongOperation:
         sockets.try_read(fd, NULL, len);
         return NULL;
-      case TextReadOperation:
+      case TextOperation:
       case ContinueReadOperation:
         if (!sockets.try_read(fd, &data[current_offset], len)) return NULL;
 
@@ -133,7 +136,38 @@ static char *read_response(int fd) {
 
   return data;
 }
+static char *try_read_response(int fd) {
+  let datagram = read_response(fd);
+  console.info("Invalid datagram");
+  return datagram;
+}
+
+void write_response(int fd, const char *message) {
+  int websocket_hdr_len;
+  int i;
+
+  let length = strlen(message);
+  unsigned char websocket_message[WebsocketHeaderSize];
+  websocket_message[0] = FinishBitLayout | TextOperation;
+  if (length < 126) {
+    websocket_hdr_len = 2;
+    websocket_message[1] = length & 0x7F;
+  } else if (length < (1 << 16)) {
+    websocket_hdr_len = 4;
+    websocket_message[1] = 126;
+    websocket_message[2] = (length >> 8) & 0xFF;
+    websocket_message[3] = length & 0xFF;
+  } else {
+    websocket_hdr_len = 10;
+    websocket_message[1] = 127;
+    for (i = 0; i < 8; ++i) websocket_message[i + 2] = (length >> ((7 - i) * 8)) & 0xFF;
+  }
+
+  sockets.try_send(fd, websocket_message, websocket_hdr_len);
+  sockets.try_send(fd, (void *) message, length);
+}
 
 const struct datagrams_lib datagrams = {
-        .read = read_response,
+        .try_read = read_response,
+        .write = write_response,
 };
