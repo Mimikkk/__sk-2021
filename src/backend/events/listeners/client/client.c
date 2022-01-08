@@ -76,7 +76,7 @@ static void handle_messages(struct epoll_event event) {
 
   let datagram = datagrams.try_read(fd);
   if (!datagram) return;
-  console.info("try_read: [%s] from '%s' at '%d'", datagram, listener->info.name, fd);
+  console.info("Read: [%s] from '%s' at '%d'", datagram, listener->info.name, fd);
 
   if (strstr(datagram, commands.Message)) {
     char *message = malloc(DefaultBufferSize);

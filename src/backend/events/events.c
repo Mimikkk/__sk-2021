@@ -57,7 +57,7 @@ static void handle_event(struct epoll_event event) {
     if (listener->should_exit) return;
   }
   if (is_readable(event) && listener->on_input) {
-    console.info("Handling try_read event");
+    console.info("Handling read event");
     listener->on_input(event);
     if (listener->should_exit) return;
   }
@@ -86,7 +86,7 @@ static char *event_info_callbacks(struct epoll_event event) {
   var info = "";
   if (is_hangup(event)) info = str("%s%s", info, "hangup ");
   if (is_error(event)) info = str("%s%s", info, "error ");
-  if (is_readable(event)) info = str("%s%s", info, "try_read ");
+  if (is_readable(event)) info = str("%s%s", info, "read ");
   if (is_writeable(event)) info = str("%s%s", info, "write ");
   return strip(info);
 }
