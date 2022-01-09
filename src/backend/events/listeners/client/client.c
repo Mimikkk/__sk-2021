@@ -1,14 +1,10 @@
 #include <events/listeners/client/client.h>
-#include <shared/utils/encryption.h>
 #include <shared/utils/console.h>
 #include <server/sockets.h>
-#include <string.h>
 #include <stdio.h>
 #include <malloc.h>
 #include <shared/utils/common.h>
 #include <events/events.h>
-#include <unistd.h>
-#include <sys/socket.h>
 #include <server/responses/datagrams.h>
 #include <statistics/statistics.h>
 
@@ -34,8 +30,7 @@ static void handle_first_message(struct epoll_event event) {
       sscanf(line, NameWildcard, name);
       console.info("Found name: [%s]", name);
 
-
-      if (strcmp(name, "server") != 0 && listeners.contains_name(name)) {
+      if (listeners.contains_name(name)) {
         console.error("Contains duplicate socket identified as '%s'", name);
         free(name);
         return handle_close(event);
@@ -94,7 +89,8 @@ static void handle_messages(struct epoll_event event) {
     console.event("Message to '%s' with [%s]", listener->info.name, recipient, message);
 
     if (listeners.contains_name(recipient)) {
-      let json = str("{ \"messenger\": \"%s\", message: \"%s\", \"type\": \"message\" }", listener->info.name, message);
+      let json = str("{ \"messenger\": \"%s\", \"message\": \"%s\", \"type\": \"message\" }",
+                     listener->info.name, message);
       datagrams.write(listeners.get_by_name(recipient)->info.fd, json);
       free(json);
     }
