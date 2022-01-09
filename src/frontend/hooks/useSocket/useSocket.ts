@@ -1,29 +1,60 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { isConnected, SocketStatus } from './socketStatus';
+import { Nullable } from 'utils';
+import { useToggle } from 'hooks';
+import { commandService } from 'services';
 
-interface UseSocket {
-  socket: WebSocket;
-  reconnect: () => void;
+const server_url = import.meta.env.VITE_SERVER_URL;
+
+export interface UseSocketReturn {
+  socket: Nullable<WebSocket>;
+  status: SocketStatus;
+  connect: () => void;
+  disconnect: () => void;
+  send: (message: string, recipient: string) => void;
 }
 
-export const useSocket = (url: string): UseSocket => {
-  const socket = useRef(new WebSocket(url));
+export const useSocket = (name: string): UseSocketReturn => {
+  const socketRef = useRef<Nullable<WebSocket>>(null);
+  const socket = socketRef.current;
 
-  const closeSocket = useCallback(socket.current.close, [socket]);
+  const [status, setStatus] = useState(SocketStatus.Uninitialized);
+  const [shouldConnect, connect] = useToggle();
 
-  const reconnect = useCallback(() => {
-    socket.current = new WebSocket(url);
-
-    const s = socket.current;
-    s.addEventListener('message', (event) => {
-      console.log({ event });
-    });
-  }, [url]);
-
-  console.log('Fuck you?');
   useEffect(() => {
-    reconnect();
-    return closeSocket;
-  }, [url]);
+    if (socketRef.current) disconnect();
+    if (name) {
+      socketRef.current = new WebSocket(`ws://${server_url}/${name}`);
+      setStatus(SocketStatus.Connecting);
 
-  return { socket: socket.current, reconnect } as const;
+      socketRef.current.addEventListener('close', () =>
+        setStatus(SocketStatus.Disconnected),
+      );
+      socketRef.current.addEventListener('open', () =>
+        setStatus(SocketStatus.Connected),
+      );
+
+      const ws = socketRef.current;
+      return () => ws?.close();
+    }
+  }, [shouldConnect]);
+
+  const send = useCallback(
+    (message, recipient) => {
+      if (isConnected(status)) {
+        commandService.send(socket!, message, recipient);
+      }
+    },
+    [status],
+  );
+
+  const disconnect = useCallback(() => {
+    if (isConnected(status)) {
+      commandService.close(socket!);
+      socketRef.current = null;
+      setStatus(SocketStatus.Disconnecting);
+    }
+  }, [status]);
+
+  return { socket, status, connect, disconnect, send } as const;
 };

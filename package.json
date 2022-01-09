@@ -11,9 +11,11 @@
     "faker": "^5.5.3",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "vite-tsconfig-paths": "^3.3.17"
+    "vite-tsconfig-paths": "^3.3.17",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.178",
     "@types/classnames": "^2.3.1",
     "@types/faker": "^5.5.9",
     "@types/react": "^17.0.33",
