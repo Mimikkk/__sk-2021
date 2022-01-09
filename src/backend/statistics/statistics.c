@@ -23,7 +23,7 @@ static void display_server_statistics(void) {
   console.stat("Connections: %s%d%s/%s%d%s",
                colors.Green, current_connections, colors.Reset,
                colors.Yellow, total_connections, colors.Reset);
-  console.stat("Connected users: %s", names ? names : "none");
+  console.stat("Connected users: %s", names);
   console.stat("Total events %d [%swrite %s%d%s|%sread %s%d%s|%serror %s%d%s|%shangup %s%d%s]",
                total_events,
                colors.Gray, colors.Blue, total_write_events, colors.Reset,

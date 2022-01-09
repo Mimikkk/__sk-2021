@@ -8,6 +8,7 @@ typedef struct listener_info_t {
     response_t response;
     const char *name;
     bool should_exit;
+    size_t fd;
 } ListenerInfo;
 
 typedef struct listener_t {
@@ -20,11 +21,13 @@ typedef struct listener_t {
 
 extern const struct listeners_lib {
     Listener *(*get)(size_t);
+    Listener *(*get_by_name)(const char *);
+
     void (*set)(size_t, Listener);
     Listener (*empty)(void);
     void (*clear)(size_t);
 
     void (*premature_exit)(size_t);
     bool (*contains_name)(const char *);
-    char*(*names_joined)(void);
+    char *(*names_joined)(void);
 } listeners;

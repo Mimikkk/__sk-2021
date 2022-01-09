@@ -86,13 +86,25 @@ static void handle_messages(struct epoll_event event) {
   console.info("Read: [%s] from '%s' at '%d'", datagram, listener->info.name, fd);
 
   if (starts_with(commands.Message, datagram)) {
+
     char *message = malloc(DefaultBufferSize);
     char *recipient = malloc(DefaultBufferSize);
     sscanf(datagram, commands.MessageWildcard, recipient, message);
     console.event("Message to '%s' with [%s]", listener->info.name, recipient, message);
+
+    if (listeners.contains_name(recipient)) {
+      let json = str("{ \"messenger\": \"%s\", message: \"%s\", \"type\": \"message\" }", listener->info.name, message);
+      datagrams.write(listeners.get_by_name(recipient)->info.fd, json);
+      free(json);
+    }
   } else if (starts_with(commands.Info, datagram)) {
     console.event("'%s' requested server info", listener->info.name);
-    datagrams.write(fd, str("'%s' is your name :)", listener->info.name));
+    let names = listeners.names_joined();
+
+    let json = str("{ \"names\": %s, \"type\": \"info\" }", names);
+    datagrams.write(fd, json);
+    free(names);
+    free(json);
     console.event("Server send server info");
   } else if (starts_with(commands.Close, datagram)) {
     handle_close(event);
@@ -112,7 +124,6 @@ static void shake_hand(struct epoll_event event) {
 static void handle_close(struct epoll_event event) {
   let fd = event.data.fd;
   console.event("Removing socket '%d' from watch", fd);
-
   events.remove(fd);
   listeners.clear(fd);
   listeners.premature_exit(fd);
