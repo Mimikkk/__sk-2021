@@ -1,4 +1,4 @@
-#include <shared/utils/imports.h>
+#include <shared/imports.h>
 #include <shared/utils/error_handle.h>
 #include "console.h"
 
@@ -6,8 +6,8 @@ static const int Success = 0;
 static const int Failure = 1;
 
 static void handle_exit(int exitcode) {
-  if (exitcode != Success) console.error("Exiting due to error with code '%d'\n", exitcode);
-  else console.info("Exiting successfully.\n", exitcode);
+  if (exitcode != Success) console.error("Exiting due to error with code '%d'", exitcode);
+  else console.info("Exiting successfully");
   exit(exitcode);
 }
 static bool handle_error(bool is_error, const char *message) {
