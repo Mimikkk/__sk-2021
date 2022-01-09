@@ -5,4 +5,5 @@ extern const struct console_lib {
     void (*info)(const char *format, ...);
     void (*event)(const char *format, ...);
     void (*error)(const char *format, ...);
+    void (*stat)(const char *format, ...);
 } console;
