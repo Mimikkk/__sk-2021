@@ -55,7 +55,7 @@ static bool ping_response(int fd, uint64_t len, const unsigned char masking_key[
     if (!sockets.try_send(fd, buffer, 8)) return false;
   }
 
-  for (size_t i = 0; i < len; i++) {
+  for (int i = 0; i < len; i++) {
     if (!sockets.try_read(fd, buffer, 1)) return false;
     buffer[0] ^= masking_key[i % 4];
     if (!sockets.try_send(fd, buffer, 1)) return false;
@@ -77,7 +77,7 @@ static uint64_t find_size_with_extra(int fd, uint64_t extra) {
   if (!sockets.try_read(fd, buffer, extra)) return -1;
 
   var len = 0;
-  for (size_t i = 0; i < extra; ++i) len = (len << 8) + buffer[i];
+  for (int i = 0; i < extra; ++i) len = (len << 8) + buffer[i];
   return len;
 }
 static uint64_t find_size(int fd, uint64_t length) {
@@ -125,7 +125,7 @@ static char *read_response(int fd) {
       case ContinueReadOperation:
         if (!sockets.try_read(fd, &data[current_offset], len)) return NULL;
 
-        for (size_t i = 0; i < len; ++i) ((unsigned char *) data)[current_offset + i] ^= masking_key[i % 4];
+        for (int i = 0; i < len; ++i) ((unsigned char *) data)[current_offset + i] ^= masking_key[i % 4];
         current_offset += len;
         break;
       default:

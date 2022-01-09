@@ -7,7 +7,7 @@ extern const struct sockets_lib {
     void (*close)(int);
     char *(*readline)(int);
     void (*send)(int, const char *);
-    void (*read)(int, void *, size_t);
-    bool (*try_read)(int, void *, size_t);
-    bool (*try_send)(int, void *, size_t);
+    void (*read)(int, void *, int);
+    bool (*try_read)(int, void *, int);
+    bool (*try_send)(int, void *, int);
 } sockets;

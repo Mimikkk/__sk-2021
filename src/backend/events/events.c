@@ -8,7 +8,7 @@
 
 enum { MaxEvents = 10 };
 
-static size_t awaited_count;
+static int awaited_count;
 static struct epoll_event awaited[MaxEvents];
 
 static void event_info(struct epoll_event event);
@@ -79,7 +79,7 @@ static void handle_event(struct epoll_event event) {
 static void handle_events(void) {
   console.event("Awaited '%d' event/s", awaited_count);
 
-  for (size_t n = 0; n < awaited_count; ++n) handle_event(awaited[n]);
+  for (int n = 0; n < awaited_count; ++n) handle_event(awaited[n]);
 }
 
 const struct events_lib events = {

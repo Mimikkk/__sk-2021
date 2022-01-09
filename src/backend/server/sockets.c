@@ -1,13 +1,12 @@
 #include <server/sockets.h>
 #include <shared/imports.h>
 #include <events/listeners/listeners.h>
-#include <events/chain.h>
 #include <shared/utils/common.h>
 #include "shared/utils/console.h"
 
 static char *read_socket_line(int fd) {
-  size_t buffer_size = 0;
-  size_t read_buffer_size = 0;
+  int buffer_size = 0;
+  int read_buffer_size = 0;
   ssize_t size;
   char symbol;
   char *buffer = NULL;
@@ -39,12 +38,12 @@ static void close_socket(int fd) {
   listeners.clear(fd);
 }
 
-static bool try_read(int fd, void *data, size_t n) {
+static bool try_read(int fd, void *data, int n) {
   let had_error = read(fd, data, n) != n;
   if (had_error) console.error("failed to read %d bytes", n);
   return !had_error;
 }
-static bool try_send(int fd, void *data, size_t n) {
+static bool try_send(int fd, void *data, int n) {
   let had_error = write(fd, data, n) != n;
   if (had_error) console.error("failed to send %d bytes", n);
   return !had_error;
@@ -54,7 +53,7 @@ const struct sockets_lib sockets = {
         .close=close_socket,
         .readline = read_socket_line,
         .send = send_response,
-        .read = (void (*)(int, void *, size_t)) read,
+        .read = (void (*)(int, void *, int)) read,
         .try_read = try_read,
         .try_send = try_send,
 };
