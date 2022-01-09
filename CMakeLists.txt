@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 23)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-link_libraries(Threads::Threads)
+find_package(OpenSSL REQUIRED)
 
 # Source directories and files
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/backend)
@@ -19,6 +19,8 @@ file(GLOB_RECURSE SOURCES ${SRC_DIR}/*.h ${SRC_DIR}/*.c)
 message(STATUS "Found ${SOURCES} source files")
 
 add_executable(server ${SRC_DIR}/main.c ${SOURCES})
-add_executable(client ${SRC_DIR}/main.c ${SOURCES})
 target_include_directories(server PRIVATE ${SRC_DIR})
-target_include_directories(client PRIVATE ${SRC_DIR})
+target_link_libraries(server PRIVATE OpenSSL::applink)
+target_link_libraries(server PRIVATE OpenSSL::SSL)
+target_link_libraries(server PRIVATE OpenSSL::Crypto)
+target_link_libraries(server PRIVATE Threads::Threads)

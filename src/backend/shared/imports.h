@@ -3,12 +3,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdarg.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <errno.h>
 #include <time.h>
 #include <netdb.h>
+#include <malloc.h>
 #include <signal.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
