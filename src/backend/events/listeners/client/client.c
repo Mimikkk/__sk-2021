@@ -34,7 +34,8 @@ static void handle_first_message(struct epoll_event event) {
       sscanf(line, NameWildcard, name);
       console.info("Found name: [%s]", name);
 
-      if (listeners.contains_name(name)) {
+
+      if (strcmp(name, "server") != 0 && listeners.contains_name(name)) {
         console.error("Contains duplicate socket identified as '%s'", name);
         free(name);
         return handle_close(event);

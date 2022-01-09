@@ -38,7 +38,7 @@ static void premature_exit(size_t fd) {
 }
 
 static bool name_exists(size_t fd) {
-  return fds[fd].info.name != NULL;
+  return fds[fd].info.name != NULL && strcmp(fds[fd].info.name, "server") != 0;
 }
 static bool contains_name(const char *name) {
   for (size_t fd = 0; fd < MaxListeners; ++fd)
