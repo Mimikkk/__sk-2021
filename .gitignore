@@ -1,3 +1,7 @@
 /.idea/
 /bin/
+/node_modules/
+/**/env*
+/**/.env*
+
 /cmake-build-*/
