@@ -168,6 +168,7 @@ void write_response(int fd, const char *message) {
 }
 
 const struct datagrams_lib datagrams = {
-        .try_read = read_response,
+        .try_read = try_read_response,
+        .read = read_response,
         .write = write_response,
 };
