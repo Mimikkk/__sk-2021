@@ -7,6 +7,8 @@ export const useServerInfo = () => {
   const { socket, status, connect, disconnect } = useSocket('server');
 
   useEffect(() => {
+    console.log('useServerInfo', status);
+
     if (isConnected(status)) {
       socket!.onmessage = ({ data }) => {
         data = JSON.parse(data);
@@ -27,13 +29,15 @@ export const useServerInfo = () => {
       };
     }
 
-    const handle = setInterval(() => {
-      if (socket?.CLOSED || true) {
-        connect();
-      }
-    }, 5000);
-
-    return clearInterval(handle);
+    // const handle = setInterval(() => {
+    //   console.log('status', status);
+    //   if (!isConnected(status)) {
+    //     connect();
+    //   }
+    // }, 5000);
+    // return () => {
+    //   clearInterval(handle);
+    // };
   }, [status]);
 
   return { users } as const;

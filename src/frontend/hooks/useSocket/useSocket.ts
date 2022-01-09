@@ -7,6 +7,7 @@ import { commandService } from 'services';
 const server_url = import.meta.env.VITE_SERVER_URL;
 
 export interface UseSocketReturn {
+  name: string;
   socket: Nullable<WebSocket>;
   status: SocketStatus;
   connect: () => void;
@@ -14,35 +15,33 @@ export interface UseSocketReturn {
   send: (message: string, recipient: string) => void;
 }
 
-export const useSocket = (name: string): UseSocketReturn => {
-  const socketRef = useRef<Nullable<WebSocket>>(null);
-  const socket = socketRef.current;
+export const useSocket = (newName: string): UseSocketReturn => {
+  const [name, setName] = useState('');
+  const socket = useRef<Nullable<WebSocket>>(null);
 
   const [status, setStatus] = useState(SocketStatus.Uninitialized);
   const [shouldConnect, connect] = useToggle();
 
   useEffect(() => {
-    if (socketRef.current) disconnect();
-    if (name) {
-      socketRef.current = new WebSocket(`ws://${server_url}/${name}`);
+    if (socket.current) disconnect();
+    if (newName) {
+      setName(newName);
+      socket.current = new WebSocket(`ws://${server_url}/${newName}`);
       setStatus(SocketStatus.Connecting);
 
-      socketRef.current.addEventListener('close', () =>
+      socket.current.addEventListener('close', () =>
         setStatus(SocketStatus.Disconnected),
       );
-      socketRef.current.addEventListener('open', () =>
+      socket.current.addEventListener('open', () =>
         setStatus(SocketStatus.Connected),
       );
-
-      const ws = socketRef.current;
-      return () => ws?.close();
     }
   }, [shouldConnect]);
 
   const send = useCallback(
     (message, recipient) => {
       if (isConnected(status)) {
-        commandService.send(socket!, message, recipient);
+        commandService.send(socket.current!, message, recipient);
       }
     },
     [status],
@@ -50,11 +49,19 @@ export const useSocket = (name: string): UseSocketReturn => {
 
   const disconnect = useCallback(() => {
     if (isConnected(status)) {
-      commandService.close(socket!);
-      socketRef.current = null;
+      commandService.close(socket.current!);
+      socket.current = null;
       setStatus(SocketStatus.Disconnecting);
+      setName('');
     }
   }, [status]);
 
-  return { socket, status, connect, disconnect, send } as const;
+  return {
+    socket: socket.current,
+    name,
+    status,
+    connect,
+    disconnect,
+    send,
+  } as const;
 };
