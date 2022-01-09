@@ -7,12 +7,12 @@
 typedef struct listener_info_t {
     response_t response;
     const char *name;
+    bool should_exit;
 } ListenerInfo;
 
 typedef struct listener_t {
-    bool should_exit;
-    void (*on_input)(struct epoll_event);
-    void (*on_output)(struct epoll_event);
+    void (*on_read)(struct epoll_event);
+    void (*on_write)(struct epoll_event);
     void (*on_error)(struct epoll_event);
     void (*on_hangup)(struct epoll_event);
     struct listener_info_t info;
@@ -26,4 +26,5 @@ extern const struct listeners_lib {
 
     void (*premature_exit)(size_t);
     bool (*contains_name)(const char *);
+    char*(*names_joined)(void);
 } listeners;

@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <server/responses/datagrams.h>
+#include <statistics/statistics.h>
 
 static void shake_hand(struct epoll_event event);
 static void handle_messages(struct epoll_event event);
@@ -27,6 +28,7 @@ static void handle_first_message(struct epoll_event event) {
   char *line;
   while ((line = sockets.readline(fd)) != NULL) {
     console.info("Read from socket: [%s]", line);
+
     if (strstr(line, NameKey)) {
       char *name = malloc(DefaultBufferSize);
       sscanf(line, NameWildcard, name);
@@ -38,6 +40,8 @@ static void handle_first_message(struct epoll_event event) {
         return handle_unexpected(event);
       }
       listener->info.name = str(name);
+      ++(*statistics.total_connections);
+      ++(*statistics.current_connections);
       free(name);
     } else if (strstr(line, WebSocketKey)) {
       char *key = malloc(DefaultBufferSize);
@@ -51,8 +55,8 @@ static void handle_first_message(struct epoll_event event) {
   }
 
   free(line);
-  listener->on_input = handle_messages;
-  listener->on_output = shake_hand;
+  listener->on_read = handle_messages;
+  listener->on_write = shake_hand;
 }
 
 static const char CommandInfo[] = "<>server_info<>";
@@ -96,7 +100,7 @@ static void shake_hand(struct epoll_event event) {
 
   console.event("Shook hands with '%s' at '%d'", listener->info.name, fd);
   responses.send(listener->info.response, fd);
-  listener->on_output = NULL;
+  listener->on_write = NULL;
 }
 
 static void handle_unexpected(struct epoll_event event) {
@@ -106,9 +110,10 @@ static void handle_unexpected(struct epoll_event event) {
   events.remove(fd);
   listeners.clear(fd);
   listeners.premature_exit(fd);
+  --(*statistics.current_connections);
 }
 static Listener create(void) {
-  return (Listener) {.on_input=handle_first_message, .on_hangup=handle_unexpected, .on_error=handle_unexpected};
+  return (Listener) {.on_read=handle_first_message, .on_hangup=handle_unexpected, .on_error=handle_unexpected};
 }
 
 const struct client_listener_t client_listener = {

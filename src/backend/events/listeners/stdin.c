@@ -8,7 +8,7 @@ static void stop_chain(struct epoll_event event) {
 }
 
 static Listener create(void) {
-  return (Listener) {.on_input=stop_chain};
+  return (Listener) {.on_read=stop_chain};
 }
 
 const struct stdin_listener_t stdin_listener = {

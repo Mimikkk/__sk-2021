@@ -11,4 +11,5 @@ extern const struct thread_lib {
     Thread (*create)(void *);
     bool (*is_alive)(const Thread);
     void (*join)(const Thread);
+    void (*kill)(const Thread);
 } threads;

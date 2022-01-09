@@ -4,6 +4,7 @@
 #include <server/server.h>
 #include <events/chain.h>
 #include <unistd.h>
+#include <statistics/statistics.h>
 
 int main(void) {
   console.info("Starting server...");
@@ -11,14 +12,15 @@ int main(void) {
   console.info("Started server %s.", server.info());
 
   console.info("Creating epoll thread...");
-  Thread thread = threads.create(chains.start);
-  while (threads.is_alive(thread)) {
-//    console.info("Waiting for epoll thread to finish...");
-    sleep(2);
-  }
+  Thread chain = threads.create(chains.start);
+  Thread statistic = threads.create(statistics.start);
+  while (threads.is_alive(chain)) sleep(2);
 
   console.info("Exiting application, waiting on all threads...");
-  threads.join(thread);
+  threads.kill(statistic);
+  
+  threads.join(chain);
+  threads.join(statistic);
   console.info("Joined");
 
   server.close();
