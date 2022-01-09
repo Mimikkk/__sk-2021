@@ -29,3 +29,9 @@ char *str(const char *format, ...) {
   va_end(arguments);
   return buffer;
 }
+
+bool starts_with(const char *prefix, const char *s) {
+  size_t str_length = strlen(s);
+  size_t prefix_length = strlen(prefix);
+  return str_length < prefix_length ? false : memcmp(prefix, s, prefix_length) == 0;
+}
