@@ -1,3 +1,3 @@
 export * from './useSocket';
 export * from './useToggle';
-export * from './useServerInfo';
+export * from './useServer';

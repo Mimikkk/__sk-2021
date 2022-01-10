@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
-import { isConnected, isDisconnected, useSocket } from './useSocket';
-import { commandService, isInfoEvent } from '../services';
+import { isConnected, isDisconnected, useSocket } from 'hooks';
+import { commandService, isInfoEvent } from 'services';
 
 export const useServerInfo = () => {
   const [users, setUsers] = useState<string[]>([]);
   const { socket, status, connect, disconnect } = useSocket('server');
 
   useEffect(() => {
-    console.log('useServerInfo', status);
-
     if (isConnected(status)) {
       socket!.onmessage = ({ data }) => {
         data = JSON.parse(data);
@@ -28,16 +26,6 @@ export const useServerInfo = () => {
         disconnect();
       };
     }
-
-    // const handle = setInterval(() => {
-    //   console.log('status', status);
-    //   if (!isConnected(status)) {
-    //     connect();
-    //   }
-    // }, 5000);
-    // return () => {
-    //   clearInterval(handle);
-    // };
   }, [status]);
 
   return { users } as const;

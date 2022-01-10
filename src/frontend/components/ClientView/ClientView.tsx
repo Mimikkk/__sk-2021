@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useSocket, isConnected, isDisconnected, useServerInfo } from 'hooks';
+import { useSocket, isConnected, isDisconnected } from 'hooks';
 import faker from 'faker';
 import { sample, without } from 'lodash';
 import './ClientView.scss';
-import { isMessageEvent } from '../../services';
+import { isMessageEvent } from 'services';
+import { useServerContext } from 'hooks';
 
 export module Message {
   export interface Model {
@@ -13,7 +14,7 @@ export module Message {
 }
 
 export const ClientView = () => {
-  const { users } = useServerInfo();
+  const { users } = useServerContext();
   const [newName, setNewName] = useState<string>('');
   const [messages, setMessages] = useState<Message.Model[]>([]);
   const { socket, status, name, connect, disconnect, send } =
