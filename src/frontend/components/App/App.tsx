@@ -1,16 +1,23 @@
+import { ClientView, UserList } from 'components';
+import { useServer } from 'hooks';
 import './App.scss';
-import { ClientView } from 'components/ClientView';
-import { useServer } from '../../hooks/useServerContext';
+import { Grid } from '@mui/material';
 
 export const App = () => {
   const [ServerProvider] = useServer();
 
   return (
     <div className="app">
-      <header>sk-chat</header>
       <article>
         <ServerProvider>
-          <ClientView />
+          <Grid container spacing={2}>
+            <Grid item xs={3} sx={{ borderRight: 1 }}>
+              <UserList />
+            </Grid>
+            <Grid item xs={9}>
+              <ClientView />
+            </Grid>
+          </Grid>
         </ServerProvider>
       </article>
     </div>
