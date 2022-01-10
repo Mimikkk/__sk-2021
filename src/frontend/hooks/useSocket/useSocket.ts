@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { isConnected, SocketStatus } from './socketStatus';
+import { isConnected, ConnectionStatus } from './connectionStatus';
 import { Nullable } from 'utils';
 import { useToggle } from 'hooks';
 import { commandService } from 'services';
@@ -9,17 +9,17 @@ const server_url = import.meta.env.VITE_SERVER_URL;
 export interface UseSocketReturn {
   name: string;
   socket: Nullable<WebSocket>;
-  status: SocketStatus;
+  status: ConnectionStatus;
   connect: () => void;
   disconnect: () => void;
   send: (message: string, recipient: string) => void;
 }
 
-export const useSocket = (newName: string): UseSocketReturn => {
+export const useSocket = (newName?: string): UseSocketReturn => {
   const [name, setName] = useState('');
   const socket = useRef<Nullable<WebSocket>>(null);
 
-  const [status, setStatus] = useState(SocketStatus.Uninitialized);
+  const [status, setStatus] = useState(ConnectionStatus.Uninitialized);
   const [shouldConnect, connect] = useToggle();
 
   useEffect(() => {
@@ -27,13 +27,13 @@ export const useSocket = (newName: string): UseSocketReturn => {
     if (newName) {
       setName(newName);
       socket.current = new WebSocket(`ws://${server_url}/${newName}`);
-      setStatus(SocketStatus.Connecting);
+      setStatus(ConnectionStatus.Connecting);
 
       socket.current.addEventListener('close', () =>
-        setStatus(SocketStatus.Disconnected),
+        setStatus(ConnectionStatus.Disconnected),
       );
       socket.current.addEventListener('open', () =>
-        setStatus(SocketStatus.Connected),
+        setStatus(ConnectionStatus.Connected),
       );
     }
   }, [shouldConnect]);
@@ -51,7 +51,7 @@ export const useSocket = (newName: string): UseSocketReturn => {
     if (isConnected(status)) {
       commandService.close(socket.current!);
       socket.current = null;
-      setStatus(SocketStatus.Disconnecting);
+      setStatus(ConnectionStatus.Disconnecting);
       setName('');
     }
   }, [status]);
