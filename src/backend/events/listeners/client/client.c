@@ -89,8 +89,8 @@ static void handle_messages(struct epoll_event event) {
     console.event("Message to '%s' with [%s]", listener->info.name, recipient, message);
 
     if (listeners.contains_name(recipient)) {
-      let json = str("{ \"messenger\": \"%s\", \"message\": \"%s\", \"type\": \"message\" }",
-                     listener->info.name, message);
+      let json = str("{ \"messenger\": \"%s\", \"recipient\": \"%s\", \"contents\": \"%s\", \"type\": \"message\" }",
+                     listener->info.name, recipient, message);
       datagrams.write(listeners.get_by_name(recipient)->info.fd, json);
       free(json);
     }

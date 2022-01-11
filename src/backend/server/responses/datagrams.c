@@ -138,7 +138,7 @@ static char *read_response(int fd) {
 }
 static char *try_read_response(int fd) {
   let datagram = read_response(fd);
-  console.info("Invalid datagram");
+  if (datagram == NULL) console.info("Invalid datagram");
   return datagram;
 }
 

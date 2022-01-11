@@ -92,7 +92,7 @@ const struct events_lib events = {
 
 static char *event_info_callbacks(struct epoll_event event) {
   var info = "";
-  if (is_hangup(event)) info = str("%s%s", info, "string ");
+  if (is_hangup(event)) info = str("%s%s", info, "hangup ");
   if (is_error(event)) info = str("%s%s", info, "error ");
   if (is_read(event)) info = str("%s%s", info, "read ");
   if (is_write(event)) info = str("%s%s", info, "write ");
