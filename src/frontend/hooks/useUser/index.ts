@@ -1,2 +1,2 @@
 export * from './useUser';
-export * from './useUserContext';
+export { useUserContext } from './useUserContext';

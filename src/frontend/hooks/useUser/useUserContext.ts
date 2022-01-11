@@ -3,7 +3,7 @@ import { Message } from 'models';
 import { noop } from 'lodash';
 import { ConnectionStatus } from '../useSocket';
 
-export interface State {
+interface State {
   messages: Message.Model[];
   username: string;
   login: (name: string) => void;

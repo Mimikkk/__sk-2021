@@ -1,2 +1,2 @@
-export * from './useServerContext';
 export * from './useServer';
+export { useServerContext } from './useServerContext';

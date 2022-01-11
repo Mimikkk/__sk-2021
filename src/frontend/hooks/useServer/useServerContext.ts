@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-export interface State {
+interface State {
   users: string[];
 }
 export const initial: State = {
