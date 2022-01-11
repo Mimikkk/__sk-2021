@@ -3,6 +3,7 @@ export enum SocketStatus {
   Connected = 'Open',
   Disconnecting = 'Disconnecting',
   Disconnected = 'Disconnected',
+  Uninitialized = 'Uninitialized',
 }
 
 export const toStatus = (readyState: number) => {
@@ -20,11 +21,13 @@ export const toStatus = (readyState: number) => {
   }
 };
 
-export const isConnecting = (state: SocketStatus) =>
-  state === SocketStatus.Connecting;
-export const isConnected = (state: SocketStatus) =>
-  state === SocketStatus.Connected;
-export const isDisconnecting = (state: SocketStatus) =>
-  state === SocketStatus.Disconnecting;
-export const isDisconnected = (state: SocketStatus) =>
-  state === SocketStatus.Disconnected;
+export const isConnecting = (status: SocketStatus) =>
+  status === SocketStatus.Connecting;
+export const isConnected = (status: SocketStatus) =>
+  status === SocketStatus.Connected;
+export const isDisconnecting = (status: SocketStatus) =>
+  status === SocketStatus.Disconnecting;
+export const isDisconnected = (status: SocketStatus) =>
+  status === SocketStatus.Disconnected;
+export const isUninitialized = (status: SocketStatus) =>
+  status === SocketStatus.Uninitialized;

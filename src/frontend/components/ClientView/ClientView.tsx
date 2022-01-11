@@ -1,104 +1,108 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
-import {
-  commandService,
-  ServerEvent,
-  ServerEventType,
-  ServerInfo,
-  ServerMessage,
-} from 'services';
+import { useEffect, useState } from 'react';
+import { useSocket, isConnected, isDisconnected, useServerInfo } from 'hooks';
 import faker from 'faker';
-import { Nullable } from 'utils';
+import { sample, without } from 'lodash';
 import './ClientView.scss';
+import { isMessageEvent } from '../../services';
 
-const server_url = import.meta.env.VITE_SERVER_URL;
+export module Message {
+  export interface Model {
+    messenger: string;
+    contents: string;
+  }
+}
 
 export const ClientView = () => {
-  const socket = useRef<Nullable<WebSocket>>(null);
-  const [users, setUsers] = useState<string[]>([]);
+  const { users } = useServerInfo();
+  const [newName, setNewName] = useState<string>('');
+  const [messages, setMessages] = useState<Message.Model[]>([]);
+  const { socket, status, name, connect, disconnect, send } =
+    useSocket(newName);
 
   useEffect(() => {
-    if (socket.current) {
-      socket.current.onmessage = (event) => {
-        console.log({ event });
+    if (isConnected(status)) {
+      socket!.addEventListener('message', ({ data }) => {
+        data = JSON.parse(data);
 
-        let data = JSON.parse(event.data) as ServerEvent;
-        if (data.type === ServerEventType.Info) {
-          setUsers((data as ServerInfo).names);
-        } else if (data.type === ServerEventType.Message) {
-          let { messenger, message } = data as ServerMessage;
-          console.log(`Message from ${messenger} with ${message}`);
+        if (isMessageEvent(data)) {
+          setMessages((messages) => [
+            ...messages,
+            { contents: data.message, messenger: data.messenger },
+          ]);
         }
-      };
-      socket.current.onerror = (event) => {
-        console.log({ event });
-      };
-      socket.current.onclose = (event) => {
-        console.log({ event });
-      };
-      socket.current.onopen = (event) => {
-        console.log({ event });
-      };
+      });
     }
-  }, [socket.current]);
-
-  const [name, setName] = React.useState<string>('');
-
-  const handleChange = ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
-    setName(value);
+  }, [status]);
 
   return (
     <div className="client-view">
+      {name ? <header>Logged in as {name}</header> : 'Not logged in'}
+
       <label>
         Name:
-        <input onChange={handleChange} value={name} />
+        <input
+          onChange={({ target: { value } }) => setNewName(value)}
+          value={newName}
+        />
       </label>
 
       <button
         onClick={() => {
+          if (users.includes(newName)) {
+            console.log('User already logged in');
+            return;
+          }
           console.log('creating new connection with server');
-          socket.current = new WebSocket(`ws://${server_url}/${name}`);
+          connect();
         }}
-        // disabled={
-        //   !isDisconnected(toStatus(socket.current?.readyState || 3)) || !name
-        // }
+        disabled={isDisconnected(status) || !newName}
       >
         Reconnect
       </button>
       <button
         onClick={() => {
           console.log('Closing connection with server');
-          commandService.close(socket.current!);
-          socket.current?.close();
+          disconnect();
         }}
-        // disabled={!isConnected(toStatus(socket.current?.readyState || 3))}
+        disabled={!isConnected(status)}
       >
         Disconnect
       </button>
       <button
         type="button"
         onClick={() => {
-          commandService.send(
-            socket.current!,
-            faker.lorem.sentence(),
-            'monika',
-          );
-          console.log('Send random message');
+          const user = sample(without(users, newName));
+          if (!user) return;
+
+          send(faker.lorem.sentence(), user);
+          console.log(`Sent random message to ${user}`);
         }}
-        // disabled={!socket.current}
+        disabled={!isConnected(status)}
       >
         Send random sentence
       </button>
-      <button
-        type="button"
-        onClick={() => {
-          commandService.requestServerInfo(socket.current!);
-          console.log('Requested server info');
-        }}
-        // disabled={!socket.current}
-      >
-        Request server info
-      </button>
-      <p>lol</p>
+      <div style={{ display: 'flex', flexDirection: 'row', columnGap: '1em' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <p>Connected users</p>
+          <ul>
+            {users.map((user) => (
+              <li key={user}>{user}</li>
+            ))}
+          </ul>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <p>Messages</p>
+          <ul>
+            {messages.map((message) => (
+              <li key={message.contents}>
+                <span>{message.messenger}</span>
+                <span> sent </span>
+                <span>{message.contents}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 };
