@@ -1,28 +1,38 @@
 import { useServerContext } from 'hooks';
 import {
-  Collapse,
+  createTheme,
   Grid,
   List,
-  ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  ThemeProvider,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
-import { Nullable } from 'utils';
 import PersonIcon from '@mui/icons-material/Person';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import SendIcon from '@mui/icons-material/Send';
+import { useConnectionContext } from 'hooks/useConnection';
+
+const theme = createTheme({
+  typography: {
+    fontFamily: ['Quicksand', 'sans-serif'].join(','),
+  },
+});
 export const UserList = () => {
-  const [current, setCurrent] = useState<Nullable<string>>(null);
+  const { currentUser, setCurrentUser } = useConnectionContext();
   const { users } = useServerContext();
 
+  if (users.length === 0) {
+    return null;
+  }
+
   return (
-    <Grid spacing={2} flexDirection="column">
+    <Grid flexDirection="column" padding="5%" paddingTop="8%">
       <Grid item xs={12}>
-        <Typography>Currently Online</Typography>
+        <ThemeProvider theme={theme}>
+          <Typography style={{ fontSize: '1em' }}>
+            Users online {users.length}
+          </Typography>
+        </ThemeProvider>
       </Grid>
       <Grid item xs={12}>
         <List>
@@ -30,29 +40,20 @@ export const UserList = () => {
             <>
               <ListItemButton
                 onClick={() => {
-                  if (current !== user) {
-                    setCurrent(user);
+                  if (currentUser !== user) {
+                    setCurrentUser(user);
                   } else {
-                    setCurrent(null);
+                    setCurrentUser(null);
                   }
                 }}
               >
                 <ListItemIcon>
-                  <PersonIcon />
+                  <PersonIcon
+                    color={currentUser === user ? 'primary' : 'disabled'}
+                  />
                 </ListItemIcon>
                 <ListItemText primary={user} />
-                {current === user ? <ExpandLess /> : <ExpandMore />}
               </ListItemButton>
-              <Collapse in={current === user} timeout="auto">
-                <List component="div" disablePadding sx={{ pl: 4 }}>
-                  <ListItemButton>
-                    <ListItemIcon>
-                      <SendIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="message" />
-                  </ListItemButton>
-                </List>
-              </Collapse>
             </>
           ))}
         </List>

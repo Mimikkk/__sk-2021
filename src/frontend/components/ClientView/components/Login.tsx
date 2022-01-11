@@ -1,4 +1,4 @@
-import { Button, Grid, TextField, Typography } from '@mui/material';
+import { Button, Grid, TextField } from '@mui/material';
 import { useState } from 'react';
 import { useUserContext } from 'hooks';
 
@@ -10,13 +10,11 @@ export const LoginScreen = () => {
     <Grid
       container
       flexDirection="column"
-      spacing={2}
       justifyContent="center"
       alignItems="center"
+      spacing={2}
     >
-      <Grid item>
-        <Typography variant="h3">Welcome!</Typography>
-      </Grid>
+      <Grid item>Welcome!</Grid>
       <Grid item>
         <TextField
           type="text"
@@ -26,8 +24,16 @@ export const LoginScreen = () => {
         />
       </Grid>
       <Grid item>
-        <Button variant="outlined" onClick={() => login(name)} disabled={!name}>
-          Try to connect
+        <Button
+          variant="contained"
+          onClick={() => login(name)}
+          disabled={!name}
+          style={{
+            backgroundColor: '',
+            color: 'white',
+          }}
+        >
+          Log in
         </Button>
       </Grid>
     </Grid>
