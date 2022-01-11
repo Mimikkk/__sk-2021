@@ -1,17 +1,14 @@
 import { useServerInfo } from './useServerInfo';
-import { useCallback } from 'react';
-import { initial, ServerContext } from './useServerContext';
+import { ServerContext } from './useServerContext';
+import { FC } from 'react';
 
 export const useServer = () => {
   const { users } = useServerInfo();
 
-  const Provider = useCallback(
-    ({ children }) => (
-      <ServerContext.Provider value={initial}>
-        {children}
-      </ServerContext.Provider>
-    ),
-    [users],
+  const Provider: FC = ({ children }) => (
+    <ServerContext.Provider value={{ users }}>
+      {children}
+    </ServerContext.Provider>
   );
 
   return [Provider] as const;

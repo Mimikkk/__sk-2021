@@ -10,18 +10,18 @@ export const App = () => {
   return (
     <div className="app">
       <article>
-        <ServerProvider>
-          <ClientProvider>
-            <Grid container spacing={2}>
-              <Grid item xs={3} sx={{ borderRight: 1 }}>
-                <UserList />
-              </Grid>
-              <Grid item xs={9}>
-                <ClientView />
-              </Grid>
-            </Grid>
-          </ClientProvider>
-        </ServerProvider>
+        <Grid container>
+          <Grid item xs={3} sx={{ borderRight: 1 }}>
+            <ServerProvider>
+              <UserList />
+            </ServerProvider>
+          </Grid>
+          <Grid container item xs={9} alignItems="center">
+            <ClientProvider>
+              <ClientView />
+            </ClientProvider>
+          </Grid>
+        </Grid>
       </article>
     </div>
   );

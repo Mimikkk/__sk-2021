@@ -44,7 +44,7 @@ export const useUser = () => {
         {children}
       </UserContext.Provider>
     ),
-    [name],
+    [status, username, messages, send],
   );
 
   return [Provider] as const;
