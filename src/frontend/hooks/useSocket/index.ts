@@ -1,2 +1,2 @@
 export * from './useSocket';
-export * from './socketStatus';
+export * from './connectionStatus';
