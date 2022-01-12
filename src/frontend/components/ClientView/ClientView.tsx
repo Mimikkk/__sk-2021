@@ -15,7 +15,6 @@ export const ClientView = () => {
 
   const [current, setCurrent] = useState('');
 
-  console.log({ currentUser, current, messages, status, username });
   return (
     <div
       style={{
