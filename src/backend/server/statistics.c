@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include "server.h"
 
-static const int MaxConnections = 3;
+static const int MaxConnections = 20;
 static const int Port = 9090;
 static const char Address[] = "127.0.0.1";
 

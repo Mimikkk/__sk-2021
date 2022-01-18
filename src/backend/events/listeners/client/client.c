@@ -11,6 +11,7 @@
 static void shake_hand(struct epoll_event event);
 static void handle_messages(struct epoll_event event);
 static void handle_close(struct epoll_event event);
+static void send_datagram(struct epoll_event event);
 
 static void handle_first_message(struct epoll_event event) {
   static const char *const WebSocketWildcard = "Sec-WebSocket-Key: %s";
@@ -72,6 +73,7 @@ const struct commands_t {
         .MessageWildcard = CommandMessageWildcard
 };
 
+static char *Message;
 static void handle_messages(struct epoll_event event) {
   console.info("just reading a datagram :)");
   let fd = event.data.fd;
@@ -91,17 +93,21 @@ static void handle_messages(struct epoll_event event) {
     if (listeners.contains_name(recipient)) {
       let json = str("{ \"messenger\": \"%s\", \"recipient\": \"%s\", \"contents\": \"%s\", \"type\": \"message\" }",
                      listener->info.name, recipient, message);
+
       datagrams.write(listeners.get_by_name(recipient)->info.fd, json);
       free(json);
     }
+
+    free(message);
+    free(recipient);
   } else if (starts_with(commands.Info, datagram)) {
     console.event("'%s' requested server info", listener->info.name);
     let names = listeners.names_joined();
-
     let json = str("{ \"names\": %s, \"type\": \"info\" }", names);
-    datagrams.write(fd, json);
     free(names);
-    free(json);
+
+    Message = json;
+    listener->on_write = send_datagram;
     console.event("Server send server info");
   } else if (starts_with(commands.Close, datagram)) {
     handle_close(event);
@@ -115,6 +121,15 @@ static void shake_hand(struct epoll_event event) {
 
   console.event("Shook hands with '%s' at '%d'", listener->info.name, fd);
   responses.send(listener->info.response, fd);
+  listener->on_write = NULL;
+}
+
+static void send_datagram(struct epoll_event event) {
+  let fd = event.data.fd;
+  let listener = listeners.get(fd);
+
+  datagrams.write(fd, Message);
+  free(Message);
   listener->on_write = NULL;
 }
 

@@ -6,7 +6,7 @@
 #include <statistics/statistics.h>
 #include <events/listeners/listeners.h>
 
-enum { MaxEvents = 10 };
+enum { MaxEvents = 100 };
 
 static int awaited_count;
 static struct epoll_event awaited[MaxEvents];

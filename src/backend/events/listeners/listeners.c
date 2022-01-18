@@ -8,7 +8,7 @@ enum { MaxListeners = 1024 };
 static Listener fds[MaxListeners];
 
 static ListenerInfo empty_info(int fd) {
-  return (ListenerInfo) {.fd=fd};
+  return (ListenerInfo) {.fd=fd, .should_exit=false};
 }
 static Listener empty(void) {
   return (Listener) {};

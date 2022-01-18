@@ -97,13 +97,15 @@ static char *read_response(int fd) {
   char *data = calloc(DefaultBufferSize, sizeof(char));
 
   do {
-    if (!sockets.try_read(fd, buffer, 2)) return NULL;
+    if (!sockets.try_read(fd, buffer, 1)) return NULL;
 
     is_fin = buffer[0] & FinishBitLayout;
     opcode = buffer[0] & 0x0F;
-    has_mask = buffer[1] & MaskBitLayout;
 
-    if ((len = find_size(fd, buffer[1] & 0x7F)) < 0) return NULL;
+    if (!sockets.try_read(fd, buffer, 1)) return NULL;
+    has_mask = buffer[0] & MaskBitLayout;
+
+    if ((len = find_size(fd, buffer[0] & 0x7F)) < 0) return NULL;
     if (!has_mask) {
       close_response(fd);
       return NULL;
@@ -114,22 +116,29 @@ static char *read_response(int fd) {
     switch (opcode) {
       case CloseOperation:
         close_response(fd);
+        free(data);
         return NULL;
       case PingOperation:
         if (!ping_response(fd, len, masking_key)) console.error("failed to send ping response");
+        free(data);
         return NULL;
       case PongOperation:
         sockets.try_read(fd, NULL, len);
+        free(data);
         return NULL;
       case TextOperation:
       case ContinueReadOperation:
-        if (!sockets.try_read(fd, &data[current_offset], len)) return NULL;
+        if (!sockets.try_read(fd, &data[current_offset], len)) {
+          free(data);
+          return NULL;
+        }
 
         for (int i = 0; i < len; ++i) ((unsigned char *) data)[current_offset + i] ^= masking_key[i % 4];
         current_offset += len;
         break;
       default:
         console.error("Invalid dataframe");
+        free(data);
         return NULL;
     }
   } while (!is_fin);
