@@ -8,6 +8,7 @@ extern const struct server_lib {
 
     const int *socket;
     const struct sockaddr_in *address;
-    const int port;
+    const char **raw_address;
+    int *raw_port;
     const int max_connections;
 } server;

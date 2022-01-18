@@ -4,10 +4,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "server.h"
+#include "shared/utils/console.h"
 
 static const int MaxConnections = 20;
-static const int Port = 9090;
-static const char Address[] = "127.0.0.1";
+static int Port = 9090;
+static const char *Address = "127.0.0.1";
 
 static int server_socket;
 static struct sockaddr_in server_address;
@@ -30,7 +31,7 @@ static void start_listening(void) {
   quit.on(had_error, "server refused to listen");
 }
 static void initialize_address(void) {
-  server_address = (struct sockaddr_in) {AF_INET, htons(Port), {inet_addr(Address)}};
+  server_address = (struct sockaddr_in) {AF_INET, htons(*server.raw_port), {inet_addr(*server.raw_address)}};
 }
 
 static void open_server(void) {
@@ -57,13 +58,14 @@ const struct server_lib server = {
         .info = server_info,
         .accept = accept_connection,
 
-        .port = Port,
+        .raw_port = &Port,
         .socket = &server_socket,
         .address = &server_address,
+        .raw_address = &Address,
         .max_connections = MaxConnections,
 };
 
 static const char *server_info(void) {
   return str("socket '%d' at %s:%d with %d max connections",
-             *server.socket, inet_ntoa(server.address->sin_addr), server.port, server.max_connections);
+             *server.socket, inet_ntoa(server.address->sin_addr), *server.raw_port, server.max_connections);
 }

@@ -4,9 +4,13 @@
 #include <server/server.h>
 #include <events/chain.h>
 #include <unistd.h>
-#include <statistics/statistics.h>
+#include <stdlib.h>
+#include "statistics/server.h"
 
-int main(void) {
+int main(int argc, char *argv[]) {
+  *server.raw_address = argc > 1 ? argv[1] : "127.0.0.1";
+  *server.raw_port = argc > 2 ? (int) strtol(argv[2], NULL, 10) : 8080;
+
   console.info("Starting server...");
   server.open();
   console.info("Started server %s.", server.info());
@@ -18,7 +22,7 @@ int main(void) {
 
   console.info("Exiting application, waiting on all threads...");
   threads.kill(statistic);
-  
+
   threads.join(chain);
   threads.join(statistic);
   console.info("Joined");

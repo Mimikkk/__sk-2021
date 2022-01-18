@@ -3,7 +3,7 @@
 #include <shared/utils/common.h>
 #include <server/server.h>
 #include <events/events.h>
-#include <statistics/statistics.h>
+#include "statistics/server.h"
 #include "events/listeners/client/client.h"
 
 static void add_new_connection(struct epoll_event event) {
