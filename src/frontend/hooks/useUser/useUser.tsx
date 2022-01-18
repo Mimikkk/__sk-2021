@@ -25,11 +25,8 @@ export const useUser = () => {
       socket!.addEventListener('message', ({ data }) => {
         data = JSON.parse(data);
 
-        if (isMessageEvent(data)) {
-          console.log({ data });
-
+        if (isMessageEvent(data))
           setMessages((messages) => [...messages, data]);
-        }
       });
     }
   }, [status]);
