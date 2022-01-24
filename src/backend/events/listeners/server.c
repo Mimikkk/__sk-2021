@@ -3,11 +3,12 @@
 #include <shared/utils/common.h>
 #include <server/server.h>
 #include <events/events.h>
-#include "statistics/server.h"
+#include <sys/socket.h>
+#include "statistics/statistics.h"
 #include "events/listeners/client/client.h"
-
 static void add_new_connection(struct epoll_event event) {
   let fd = server.accept();
+  
   events.add(fd, EPOLLIN | EPOLLOUT | EPOLLHUP | EPOLLERR | EPOLLET);
   listeners.set(fd, client_listener.create());
   console.info("Added new client socket '%d'", fd);

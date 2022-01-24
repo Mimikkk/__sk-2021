@@ -6,7 +6,7 @@
 #include <shared/utils/common.h>
 #include <events/events.h>
 #include <server/responses/datagrams.h>
-#include "statistics/server.h"
+#include "statistics/statistics.h"
 
 static void shake_hand(struct epoll_event event);
 static void handle_messages(struct epoll_event event);

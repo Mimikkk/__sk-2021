@@ -3,9 +3,8 @@
 #include <events/threads/thread.h>
 #include <server/server.h>
 #include <events/chain.h>
-#include <unistd.h>
 #include <stdlib.h>
-#include "statistics/server.h"
+#include "statistics/statistics.h"
 
 int main(int argc, char *argv[]) {
   *server.raw_address = argc > 1 ? argv[1] : "127.0.0.1";
@@ -18,12 +17,11 @@ int main(int argc, char *argv[]) {
   console.info("Creating epoll thread...");
   Thread chain = threads.create(chains.start);
   Thread statistic = threads.create(statistics.start);
-  while (threads.is_alive(chain)) sleep(2);
+
+  threads.join(chain);
 
   console.info("Exiting application, waiting on all threads...");
   threads.kill(statistic);
-
-  threads.join(chain);
   threads.join(statistic);
   console.info("Joined");
 

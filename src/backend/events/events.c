@@ -3,7 +3,7 @@
 #include <events/chain.h>
 #include <shared/utils/error_handle.h>
 #include <shared/utils/console.h>
-#include "statistics/server.h"
+#include "statistics/statistics.h"
 #include <events/listeners/listeners.h>
 
 enum { MaxEvents = 100 };
