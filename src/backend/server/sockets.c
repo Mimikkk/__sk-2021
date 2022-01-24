@@ -31,7 +31,7 @@ static char *read_socket_line(int fd) {
 }
 
 static void send_response(int fd, const char *response) {
-  send(fd, response, strlen(response), 0);
+  send(fd, response, strlen(response), MSG_NOSIGNAL);
 }
 static void close_socket(int fd) {
   close(fd);
@@ -44,7 +44,7 @@ static bool try_read(int fd, void *data, int n) {
   return !had_error;
 }
 static bool try_send(int fd, void *data, int n) {
-  let had_error = write(fd, data, n) != n;
+  let had_error = send(fd, data, n, MSG_NOSIGNAL) != n;
   if (had_error) console.error("failed to send %d bytes", n);
   return !had_error;
 }
